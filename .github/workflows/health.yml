@@ -1,0 +1,42 @@
+name: Pages Health Check
+
+on:
+  schedule:
+    - cron: '41 * * * *'   # 每小时第 41 分钟（错开各站抓取高峰）
+  workflow_dispatch:        # 支持手动触发
+  push:
+    branches: [main]
+    paths: ['scraper.py', '.github/workflows/health.yml']
+
+permissions:
+  contents: write
+  actions: read             # 读取各仓库的 workflow 运行记录
+
+concurrency:
+  group: health
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run health check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # 1000 次/小时，未登录只有 60 次
+        run: python scraper.py
+      - name: Commit health.json
+        # health.json 里的 updated 每次都变，所以每次运行都会提交，仓库保持活跃、定时任务不会被停用
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add health.json
+          git diff --cached --quiet || git commit -m "data: health $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          git pull --rebase
+          git push
