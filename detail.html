@@ -560,6 +560,27 @@ const SITES = [
           ${top.map(g => `<div class="row"><span class="l">${esc(g.title)}</span><span class="r num">-${g.discount}% · ¥${g.price} · 史低</span></div>`).join('')}</div>`;
     },
   },
+  {
+    repo: 'exam-calendar', title: '📝 考试日历', color: '#818cf8',
+    load: () => getJSON(ORIGIN + 'exam-calendar/exams.json'),
+    render(d) {
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const days = t => Math.round((new Date(t) - new Date(today)) / 86400e3);
+      const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+      const evs = d.exams.flatMap(x => x.sessions.flatMap(s => s.events.map(e => ({ ...e, x }))));
+      const open = evs.filter(e => ['报名', '预报名', '确认'].includes(e.type) && days(e.start) <= 0 && days(e.end || e.start) >= 0)
+        .sort((a, b) => (a.end || a.start).localeCompare(b.end || b.start));
+      const next = (type) => evs.filter(e => e.type === type && days(e.start) >= 0).sort((a, b) => a.start.localeCompare(b.start))[0];
+      const ex = next('考试'), sc = next('成绩');
+      return `<div class="stats">
+          <div class="stat"><div class="k">正在报名</div><div class="v num">${open.length} 项</div><div class="s muted">${open[0] ? `${esc(open[0].x.short)} ${md(open[0].end || open[0].start)} 截止` : '暂无'}</div></div>
+          <div class="stat"><div class="k">下一场考试</div><div class="v num">${ex ? days(ex.start) + ' 天后' : '—'}</div><div class="s muted">${ex ? `${esc(ex.x.short)} · ${md(ex.start)}` : ''}</div></div>
+          <div class="stat"><div class="k">下一次出成绩</div><div class="v num">${sc ? days(sc.start) + ' 天后' : '—'}</div><div class="s muted">${sc ? `${esc(sc.x.short)} · ${md(sc.start)}${sc.status === 'estimate' ? '（预估）' : ''}` : ''}</div></div>
+        </div>
+        <div class="rows">${open.slice(0, 3).map(e => `<a class="row" href="${esc(e.x.site)}" target="_blank" rel="noopener"><span class="l">🟢 ${esc(e.x.short)} ${esc(e.type)}</span><span class="r">还剩 ${days(e.end || e.start)} 天 · ${md(e.end || e.start)} 截止</span></a>`).join('')}
+          ${evs.filter(e => e.type === '考试' && days(e.start) >= 0).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 3).map(e => `<div class="row"><span class="l">📝 ${esc(e.x.short)}</span><span class="r">${md(e.start)} 考试 · ${days(e.start)} 天后</span></div>`).join('')}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
