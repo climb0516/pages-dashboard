@@ -503,6 +503,26 @@ const SITES = [
         <div class="rows">${hot.slice(0, 5).map(i => `<a class="row" href="${esc(i.url)}" target="_blank" rel="noopener"><span class="l">${esc(i.name ? `《${i.name}》` : i.title)}</span><span class="r">${md(i.date)}${i.articles.length ? ` · ${i.articles.length} 篇报道` : ''}</span></a>`).join('') || '<div class="row"><span class="l muted">下月暂无全国新规</span></div>'}</div>`;
     },
   },
+  {
+    repo: 'match-day', title: '🏟️ 赛程', color: '#818cf8',
+    load: () => getJSON(ORIGIN + 'match-day/data.json'),
+    render(d) {
+      const bj = ts => new Date(ts * 1000 + 8 * 3600e3).toISOString();
+      const today = bj(Date.now() / 1000).slice(0, 10), now = Date.now() / 1000;
+      const dur = e => ({ football: 2, basketball: 2.5 }[e.sport] ?? (e.bo || 1) * 0.8 + 0.3) * 3600;
+      const todays = d.events.filter(e => bj(e.ts).startsWith(today));
+      const live = d.events.filter(e => !e.score && e.ts <= now && now < e.ts + dur(e));
+      const pick = d.events.filter(e => e.ts > now && (e.china || e.major) && e.home !== 'TBD').slice(0, 5);
+      const name = e => e.sport === 'esports' ? e.game : e.league;
+      const when = e => { const t = bj(e.ts); return `${t.slice(0, 10) === today ? '今天' : `${+t.slice(5, 7)}/${+t.slice(8, 10)}`} ${t.slice(11, 16)}`; };
+      return `<div class="stats">
+          <div class="stat"><div class="k">今天</div><div class="v num">${todays.length} 场</div><div class="s muted">⚽ ${todays.filter(e => e.sport === 'football').length} · 🏀 ${todays.filter(e => e.sport === 'basketball').length} · 🎮 ${todays.filter(e => e.sport === 'esports').length}</div></div>
+          <div class="stat"><div class="k">正在进行</div><div class="v num">${live.length} 场</div><div class="s muted">按开赛时间估算</div></div>
+          <div class="stat"><div class="k">中国 · 未来 14 天</div><div class="v num">${d.feeds?.['china.ics']?.count ?? '—'} 场</div><div class="s muted">可订阅日历</div></div>
+        </div>
+        <div class="rows">${pick.map(e => `<div class="row"><span class="l">${esc(name(e))} · ${esc(e.home && e.away ? `${e.home} vs ${e.away}` : e.stage || e.league)}</span><span class="r num">${when(e)}${e.china ? ' · 中' : ''}</span></div>`).join('') || '<div class="row"><span class="l muted">暂无重点比赛</span></div>'}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
