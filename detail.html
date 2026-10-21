@@ -423,6 +423,21 @@ const SITES = [
         </div>`;
     },
   },
+  {
+    repo: 'holiday-planner', title: '🏖️ 拼假攻略', color: '#4ade80',
+    load: () => getJSON(ORIGIN + 'holiday-planner/data.json'),
+    render(d) {
+      const s = d.summary, n = s.next, md = t => `${+t.slice(5, 7)}/${+t.slice(8)}`;
+      const best = s.top[0];
+      return `<div class="stats">
+          <div class="stat"><div class="k">下一个假期</div><div class="v num">${n ? `${n.days} 天` : '—'}</div><div class="s muted">${n ? `${esc(n.name)} ${md(n.date)}${n.est ? '（预估）' : ''}` : ''}</div></div>
+          <div class="stat"><div class="k">还要上班</div><div class="v num">${n ? `${n.workdays} 天` : '—'}</div><div class="s muted">内地</div></div>
+          <div class="stat"><div class="k">${s.plan_year} 最划算</div><div class="v num">${best ? `休 ${best.len} 天` : '—'}</div><div class="s muted">${best ? `请 ${best.used} 天 · ${esc(best.names.join('、'))}` : ''}</div></div>
+        </div>
+        <div class="rows">${s.top.slice(0, 4).map(p => `<div class="row"><span class="l">${esc(p.names.join('、'))} · ${md(p.from)}–${md(p.to)}</span><span class="r num">请 ${p.used} 天 → 连休 ${p.len} 天</span></div>`).join('')}
+          <div class="row"><span class="l">${s.plan_year} 放假安排</span><span class="r">${s.plan_official ? '已公布' : '未公布，按预估计算'}</span></div></div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
