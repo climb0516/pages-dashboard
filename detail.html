@@ -543,6 +543,23 @@ const SITES = [
           return s ? `<div class="row"><span class="l">${n} 起售时间</span><span class="r num">${s[1]}</span></div>` : ''; }).join('')}</div>`;
     },
   },
+  {
+    repo: 'game-deals', title: '🎁 喜加一', color: '#a3e635',
+    load: () => getJSON(ORIGIN + 'game-deals/data.json'),
+    render(d) {
+      const s = d.summary;
+      const left = t => { const h = Math.max(0, (new Date(t) - Date.now()) / 3600e3); return h >= 24 ? `${Math.floor(h / 24)} 天 ${Math.floor(h % 24)} 小时` : `${Math.floor(h)} 小时`; };
+      const sale = s.next_sale, saleDays = sale ? Math.ceil((new Date(sale.start + 'T00:00:00+08:00') - Date.now()) / 864e5) : null;
+      const top = d.steam.filter(g => g.usd_low || g.cn_low).slice(0, 4);
+      return `<div class="stats">
+          <div class="stat"><div class="k">Epic 本周限免</div><div class="v num">${s.epic_now.length} 款</div><div class="s muted">${s.epic_end ? `剩 ${left(s.epic_end)} · 原价 ¥${s.epic_now_worth}` : ''}</div></div>
+          <div class="stat"><div class="k">Steam 史低</div><div class="v num">${s.steam_lows} 款</div><div class="s muted">热销特惠前 ${d.steam.length}</div></div>
+          <div class="stat"><div class="k">下个大促</div><div class="v num">${sale ? (saleDays > 0 ? saleDays + ' 天后' : '进行中') : '—'}</div><div class="s muted">${sale ? `Steam ${esc(sale.name)}` : ''}</div></div>
+        </div>
+        <div class="rows">${s.epic_now.map(t => `<div class="row"><span class="l">Epic 免费 · ${esc(t)}</span><span class="r">本周</span></div>`).join('')}
+          ${top.map(g => `<div class="row"><span class="l">${esc(g.title)}</span><span class="r num">-${g.discount}% · ¥${g.price} · 史低</span></div>`).join('')}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
