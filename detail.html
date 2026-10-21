@@ -581,6 +581,25 @@ const SITES = [
           ${evs.filter(e => e.type === '考试' && days(e.start) >= 0).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 3).map(e => `<div class="row"><span class="l">📝 ${esc(e.x.short)}</span><span class="r">${md(e.start)} 考试 · ${days(e.start)} 天后</span></div>`).join('')}</div>`;
     },
   },
+  {
+    repo: 'car-deals', title: '🚗 车市行情', color: '#fb923c',
+    load: () => getJSON(ORIGIN + 'car-deals/data.json'),
+    render(d) {
+      const city = d.cuts['杭州'] ? '杭州' : Object.keys(d.cuts)[0];
+      const cuts = [...(d.cuts[city]?.items || [])].sort((a, b) => b.pct - a.pct);
+      const month = Object.keys(d.sales).sort().pop(), champ = d.sales[month]?.[0];
+      const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+      const up = d.launches.filter(x => x.status === 'upcoming' && x.date && x.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+      const md2 = iso => `${+iso.slice(5, 7)}月${+iso.slice(8, 10)}日`;
+      return `<div class="stats">
+          <div class="stat"><div class="k">${esc(city)} 降幅最大</div><div class="v">${esc(cuts[0]?.name || '—')}</div><div class="s" style="color:var(--down)">${cuts[0] ? `↓${cuts[0].cut} 万 · ${cuts[0].pct}%` : ''}</div></div>
+          <div class="stat"><div class="k">${month ? +month.slice(4) + ' 月' : ''}销量冠军</div><div class="v">${esc(champ?.name || '—')}</div><div class="s muted">${champ ? champ.sales.toLocaleString() + ' 辆' : ''}</div></div>
+          <div class="stat"><div class="k">下一款上市</div><div class="v">${esc(up[0]?.name || '—')}</div><div class="s muted">${up[0] ? md2(up[0].date) : ''}</div></div>
+        </div>
+        <div class="rows">${up.slice(1, 4).map(x => `<a class="row" href="${esc(x.url)}" target="_blank" rel="noopener"><span class="l">🆕 ${esc(x.name)}${x.presale ? '（预售）' : ''}</span><span class="r">${md2(x.date)}${x.price ? ` · ${x.price[0]} 万起` : ''}</span></a>`).join('')}
+          ${cuts.slice(1, 3).map(x => `<div class="row"><span class="l">💸 ${esc(x.name)}</span><span class="r" style="color:var(--down)">↓${x.cut} 万 · ${x.pct}%</span></div>`).join('')}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
