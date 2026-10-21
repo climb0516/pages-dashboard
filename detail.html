@@ -461,6 +461,28 @@ const SITES = [
           ${sales.slice(0, 2).map(c => `<a class="row" href="${esc(c.articles[0]?.url)}" target="_blank" rel="noopener"><span class="l">🎤 ${esc(c.title)}</span><span class="r">${when(c.date)}开票</span></a>`).join('')}</div>`;
     },
   },
+  {
+    repo: 'health-weekly', title: '🩺 呼吸道周报', color: '#fb7185',
+    load: () => getJSON(ORIGIN + 'health-weekly/data.json'),
+    render(d) {
+      const w = d.weeks[0];
+      const SHORT = { '新型冠状病毒': '新冠', '流感病毒': '流感', '呼吸道合胞病毒': '合胞病毒', '人偏肺病毒': '人偏肺', '副流感病毒': '副流感' };
+      const out = Object.entries(w.outpatient).sort((a, b) => b[1].rate - a[1].rate);
+      // 健康数据：上升标红、下降标绿
+      const chg = c => c == null ? '' : `<span style="color:${c > 0 ? 'var(--up)' : c < 0 ? 'var(--down)' : 'var(--text-3)'}">${c > 0 ? '↑' : c < 0 ? '↓' : ''}${c ? Math.abs(c).toFixed(1) : '持平'}</span>`;
+      const fl = w.outpatient['流感病毒'], cv = w.outpatient['新型冠状病毒'];
+      return `<div class="stats">
+          <div class="stat"><div class="k">门诊头号病原体</div><div class="v">${esc(SHORT[out[0]?.[0]] || out[0]?.[0] || '—')}</div><div class="s muted">${out[0] ? out[0][1].rate + '% ' : ''}${chg(out[0]?.[1].chg)}</div></div>
+          <div class="stat"><div class="k">流感阳性率</div><div class="v num">${fl?.rate ?? '—'}%</div><div class="s muted">较上周 ${chg(fl?.chg)}</div></div>
+          <div class="stat"><div class="k">新冠阳性率</div><div class="v num">${cv?.rate ?? '—'}%</div><div class="s muted">较上周 ${chg(cv?.chg)}</div></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="l">南方 / 北方流感</span><span class="r">${esc(w.level?.south || '—')} / ${esc(w.level?.north || '—')}</span></div>
+          <div class="row"><span class="l">流感样病例占门诊</span><span class="r">${w.ili ?? '—'}%（南 ${w.ili_south ?? '—'}% · 北 ${w.ili_north ?? '—'}%）</span></div>
+          <div class="row"><span class="l">数据周次</span><span class="r">${w.year} 年第 ${w.week} 周</span></div>
+        </div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
