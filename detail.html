@@ -621,6 +621,22 @@ const SITES = [
           <div class="row"><span class="l muted">新发地批发价，和 7 天前比</span><span class="r"></span></div></div>`;
     },
   },
+  {
+    repo: 'home-prices', title: '🏠 70 城房价', color: '#e879f9',
+    load: () => getJSON(ORIGIN + 'home-prices/data.json'),
+    render(d) {
+      const s = d.summary, m = s.month, c = s.counts.used, n = s.counts.new;
+      const p = v => v == null ? '—' : `${v > 100 ? '+' : ''}${(v - 100).toFixed(1)}%`;
+      const t = s.tiers.used;
+      return `<div class="stats">
+          <div class="stat"><div class="k">${+m.slice(5)} 月二手 · 环比</div><div class="v num">${c.up} 涨 / ${c.down} 跌</div><div class="s muted">${c.flat} 城持平 · 共 70 城</div></div>
+          <div class="stat"><div class="k">${+m.slice(5)} 月新房 · 环比</div><div class="v num">${n.up} 涨 / ${n.down} 跌</div><div class="s muted">${n.flat} 城持平</div></div>
+          <div class="stat"><div class="k">二手同比 · 一二三线</div><div class="v num">${t['1'] ? p(t['1'][1]) : '—'}</div><div class="s muted">二线 ${t['2'] ? p(t['2'][1]) : '—'} · 三线 ${t['3'] ? p(t['3'][1]) : '—'}</div></div>
+        </div>
+        <div class="rows">${Object.entries(s.tier1).map(([city, v]) => `<div class="row"><span class="l">${esc(city)} 二手</span><span class="r num"><span class="${cls((v.used?.[0] ?? 100) - 100)}">环比 ${p(v.used?.[0])}</span> · 同比 ${p(v.used?.[1])}</span></div>`).join('')}
+          <div class="row"><span class="l muted">统计局 ${esc(s.published)} 发布</span><span class="r"></span></div></div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
