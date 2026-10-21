@@ -44,7 +44,7 @@
 
 | 卡片 | 站点 | 展示 |
 |---|---|---|
-| 📊 市场 · 汇率 | market-board | 上证 / 恒指 / 纳指100，USD/CNY、HKD/CNY、USD/HKD 及日涨跌，联系汇率位置，中间价与市场价差 |
+| 📊 市场 · 汇率 | market-board | 上证 / 恒指 / 纳指100，今日异动 6 只（重点股票里涨跌幅最大的，带 logo），USD/CNY、HKD/CNY、USD/HKD 及日涨跌，联系汇率位置，中间价与市场价差 |
 | 📅 财报宏观 | earnings-calendar | 下一个高影响事件、下次 FOMC 倒计时，7 天内关注公司财报 |
 | 📈 纳指定投 | nasdaq-dca | 基金总数、可申购数，我的定投计划各基金申购状态 |
 | 🔥 全网热榜 | hot-news | 跨平台大事前 6 |
@@ -105,7 +105,7 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 
 | 站点 | 字段 |
 |---|---|
-| market-board（market.json、fx.json） | `quotes[id].{f2,f3}`（id 为东方财富代码，如 `1.000001`）；`ref.rates`、`history`、`cfets` |
+| market-board（market.json、fx.json、config.json、logos/） | `quotes[id].{f2,f3,f14}`（id 为东方财富代码，如 `1.000001`）、`config.stocks`（今日异动的候选名单）、`logos/{id}.png`；`ref.rates`、`history`、`cfets` |
 | earnings-calendar | `today_et`、`watchlist`、`macro[].{time,impact,kind,title}`、`earnings[].{date,symbol,name,time,watch}` |
 | nasdaq-dca | `plan[].{code,app}`、`funds[].{code,name,status,status_raw}` |
 | hot-news | `events[].{title,image,platforms[].url}` |
