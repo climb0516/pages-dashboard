@@ -65,7 +65,8 @@
     .c-hot { grid-column: 1 / 4; grid-row: 3 / 5; }
     .c-dca { grid-column: 4 / 6; grid-row: 3; }
     .c-tech { grid-column: 4 / 6; grid-row: 4; }
-    .c-health { grid-column: 6 / 10; grid-row: 1 / 5; }
+    .c-health { grid-column: 6 / 10; grid-row: 1 / 4; }
+    .c-holiday { grid-column: 6 / 10; grid-row: 4; }
     .c-macro { grid-column: 10 / 13; grid-row: 1; }
     .c-ern { grid-column: 10 / 13; grid-row: 2; }
     .c-apps { grid-column: 10 / 13; grid-row: 3; }
@@ -211,6 +212,7 @@
     <section class="card c-dca" id="dca"><div class="label">纳指定投</div><div class="loading">加载中…</div></section>
     <section class="card c-tech"><div class="label">技术动态<span class="r">iOS · 科技</span></div><div class="tech-rel" id="iosRel"></div><div class="rows" id="tech"></div></section>
     <section class="card c-health" id="health"><div class="label">站点健康</div><div class="loading">加载中…</div></section>
+    <section class="card c-holiday" id="holiday"><div class="label">拼假</div><div class="loading">加载中…</div></section>
     <section class="card c-macro" id="macro"><div class="label">下一个高影响事件</div><div class="loading">加载中…</div></section>
     <section class="card c-ern" id="ern"><div class="label">本周关注财报</div><div class="loading">加载中…</div></section>
     <section class="card c-apps" id="apps"><div class="label">竞品</div><div class="loading">加载中…</div></section>
@@ -381,6 +383,19 @@ function renderTech(rows) {
   $('#tech').innerHTML = rows.slice(0, 3).map(r => `<a class="row" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="ell">${esc(r.title)}</span><span class="r">${esc(r.source)}</span></a>`).join('');
 }
 
+// ── 拼假 ──
+function renderHoliday(d) {
+  const s = d.summary, n = s.next, md = t => `${+t.slice(5, 7)}/${+t.slice(8)}`;
+  $('#holiday').innerHTML = label(`拼假<span class="dim" style="margin-left:4px">· ${s.plan_year} ${s.plan_official ? '官方安排' : '预估'}</span>`, 'holiday-planner') +
+    `<div style="display:flex;gap:28px;min-height:0;flex:1">
+      <div style="flex-shrink:0">${n ? `<div class="big macro-cd">${n.days}<small>天</small></div>
+        <div style="font-size:15px;font-weight:500;margin-top:10px">${esc(n.name)} · ${md(n.date)}${n.est ? '<span class="dim">（预估）</span>' : ''}</div>
+        <div class="sub" style="font-size:13px;margin-top:4px">还要上 ${n.workdays} 天班</div>` : '<div class="loading">暂无</div>'}</div>
+      <div class="rows" style="flex:1;min-width:0">${s.top.slice(0, 3).map(p => `<div class="row" style="height:auto;padding:7px 0">
+        <span class="ell">${esc(p.names.join('、'))} <span class="dim">${md(p.from)}–${md(p.to)}</span></span><span class="r">请 ${p.used} → 休 <b style="color:var(--text-1)">${p.len}</b></span></div>`).join('')}</div>
+    </div>`;
+}
+
 // ── 站点健康 ──
 let HEALTH = null;
 function renderHealth() {
@@ -418,6 +433,7 @@ const SOURCES = [
   [() => getJSON(ORIGIN + 'appstore-tracker/data.json'), renderApps, '#apps'],
   [() => Promise.all([getJSON(ORIGIN + 'short-drama/picks.json'), getJSON(ORIGIN + 'short-drama/data.json')]), renderDrama, '#drama'],
   [() => getJSON(ORIGIN + 'ios-dev-news/data.json'), renderIos, null],
+  [() => getJSON(ORIGIN + 'holiday-planner/data.json'), renderHoliday, '#holiday'],
   [() => getJSON(`${SUPABASE_URL}/rest/v1/news_items?select=title,source,url&order=date.desc,created_at.desc&limit=6`,
       { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }), renderTech, '#tech'],
 ];
