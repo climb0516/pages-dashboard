@@ -483,6 +483,26 @@ const SITES = [
         </div>`;
     },
   },
+  {
+    repo: 'new-rules', title: '📜 每月新规', color: '#2dd4bf',
+    load: () => getJSON(ORIGIN + 'new-rules/data.json'),
+    render(d) {
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const nm = new Date(today.slice(0, 7) + '-01T00:00:00Z'); nm.setUTCMonth(nm.getUTCMonth() + 1);
+      const next = nm.toISOString().slice(0, 7), cur = today.slice(0, 7), mn = m => `${+m.slice(5)} 月`;
+      const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+      const nat = m => d.items.filter(i => i.date.startsWith(m) && !i.region && i.kind !== 'std');
+      const left = Math.round((nm - new Date(today + 'T00:00:00Z')) / 86400e3);
+      const heat = i => i.articles.length + (i.kind === 'law' ? 3 : 0);
+      const hot = nat(next).sort((a, b) => heat(b) - heat(a));
+      return `<div class="stats">
+          <div class="stat"><div class="k">${mn(next)}起施行</div><div class="v num">${nat(next).length} 条</div><div class="s muted">全国</div></div>
+          <div class="stat"><div class="k">${mn(cur)}已施行</div><div class="v num">${nat(cur).length} 条</div><div class="s muted">全国</div></div>
+          <div class="stat"><div class="k">距 ${mn(next)} 1 日</div><div class="v num">${left} 天</div><div class="s muted">${d.items.filter(i => i.date.startsWith(next) && i.kind === 'std').length} 项强制国标</div></div>
+        </div>
+        <div class="rows">${hot.slice(0, 5).map(i => `<a class="row" href="${esc(i.url)}" target="_blank" rel="noopener"><span class="l">${esc(i.name ? `《${i.name}》` : i.title)}</span><span class="r">${md(i.date)}${i.articles.length ? ` · ${i.articles.length} 篇报道` : ''}</span></a>`).join('') || '<div class="row"><span class="l muted">下月暂无全国新规</span></div>'}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
