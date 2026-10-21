@@ -247,9 +247,12 @@ const within = (t, days) => t && Date.now() - new Date(t) < days * 86400000;
 const KPI = {};
 const SITES = [
   {
-    repo: 'fx-board', title: '💱 汇率', color: '#2dd4bf',
-    load: () => getJSON(ORIGIN + 'fx-board/data.json'),
-    render(d) {
+    repo: 'market-board', key: 'market', title: '📊 市场 · 汇率', color: '#818cf8',
+    load: () => Promise.all([getJSON(ORIGIN + 'market-board/market.json'), getJSON(ORIGIN + 'market-board/fx.json')]),
+    render([m, d]) {
+      const IDX = [['1.000001', '上证指数'], ['100.HSI', '恒生指数'], ['100.NDX', '纳斯达克100']];
+      const idx = IDX.map(([id, n]) => { const q = m.quotes?.[id];
+        return `<div class="stat"><div class="k">${n}</div><div class="v num">${typeof q?.f2 === 'number' ? q.f2.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}</div><div class="s num ${cls(q?.f3 ?? 0)}">${typeof q?.f3 === 'number' ? pct(q.f3) : ''}</div></div>`; }).join('');
       const R = d.ref.rates, days = Object.keys(d.history).sort();
       const h = (day, a, b) => { const x = { USD: 1, ...d.history[day] }; return x[b] / x[a]; };
       const chg = (a, b) => (h(days.at(-1), a, b) / h(days.at(-2), a, b) - 1) * 100;
@@ -257,8 +260,8 @@ const SITES = [
       const cfDay = Object.keys(d.cfets).sort().pop(), cf = d.cfets[cfDay];
       const gap = cf ? (cf.USD / R.CNY - 1) * 100 : null;
       const pos = Math.min(100, Math.max(0, (R.HKD - 7.75) / 0.1 * 100));
-      KPI.fx = { k: 'USD/CNY', v: (R.CNY).toFixed(4), s: `日 ${pct(chg('USD', 'CNY'))} · HKD/CNY ${(R.CNY / R.HKD).toFixed(4)}`, url: ORIGIN + 'fx-board/' };
-      return `<div class="stats">${pairs.map(([a, b]) => {
+      KPI.fx = { k: 'USD/CNY', v: (R.CNY).toFixed(4), s: `日 ${pct(chg('USD', 'CNY'))} · HKD/CNY ${(R.CNY / R.HKD).toFixed(4)}`, url: ORIGIN + 'market-board/#fx' };
+      return `<div class="stats">${idx}</div><div class="stats">${pairs.map(([a, b]) => {
           const c = chg(a, b);
           return `<div class="stat"><div class="k">${a}/${b}</div><div class="v num">${(R[b] / R[a]).toFixed(4)}</div><div class="s num ${cls(c)}">${pct(c)}</div></div>`;
         }).join('')}</div>
@@ -403,8 +406,8 @@ const SITES = [
     },
   },
   {
-    repo: 'oil-gold', title: '⛽ 油价金价', color: '#f59e0b',
-    load: () => getJSON(ORIGIN + 'oil-gold/data.json'),
+    repo: 'market-board', key: 'oilgold', path: '#oilgold', title: '⛽ 油价金价', color: '#f59e0b',
+    load: () => getJSON(ORIGIN + 'market-board/oilgold.json'),
     render(d) {
       // 国内习惯：涨红跌绿
       const o = d.oil, g = d.gold, e = o.estimate || {}, au = g.quotes?.au9999;
@@ -643,25 +646,26 @@ const SITES = [
 let HEALTH = null;
 const hidden = new Set(store.get('hidden', []));
 const cache = {};
+const sid = s => s.key || s.repo;
 function healthOf(repo) { return HEALTH?.repos.find(r => r.name === repo); }
 function cardShell(s, body) {
   const h = healthOf(s.repo);
   const lv = h?.level || 'ok';
-  return `<article class="panel card" id="card-${s.repo}">
+  return `<article class="panel card" id="card-${sid(s)}">
     <div class="card-head">
       <span class="dot" style="background:${s.color}"></span><h3>${s.title}</h3>
       ${h && lv !== 'ok' ? `<span class="badge ${lv === 'error' ? 'b-err' : 'b-warn'}">${lv === 'error' ? '异常' : '注意'}</span>` : ''}
-      <span class="meta">${cache[s.repo]?.updated ? '数据 ' + ago(cache[s.repo].updated) : ''}</span>
-      <a class="go" href="${ORIGIN}${s.repo}/" target="_blank" rel="noopener">进入 →</a>
-      <button class="hide" data-hide="${s.repo}" title="隐藏这张卡片">×</button>
+      <span class="meta">${cache[sid(s)]?.updated ? '数据 ' + ago(cache[sid(s)].updated) : ''}</span>
+      <a class="go" href="${ORIGIN}${s.repo}/${s.path || ''}" target="_blank" rel="noopener">进入 →</a>
+      <button class="hide" data-hide="${sid(s)}" title="隐藏这张卡片">×</button>
     </div>
     ${body}
   </article>`;
 }
 function renderCard(s) {
-  const el = document.getElementById('card-' + s.repo);
+  const el = document.getElementById('card-' + sid(s));
   if (!el) return;
-  const c = cache[s.repo];
+  const c = cache[sid(s)];
   let body;
   if (!c) body = '<div class="skeleton"></div>';
   else if (c.error) body = `<div class="err">读取失败（${esc(c.error)}），稍后点右上角 ↻ 重试</div>`;
@@ -672,10 +676,10 @@ function renderCard(s) {
   el.outerHTML = cardShell(s, body);
 }
 function renderGrid() {
-  const visible = SITES.filter(s => !hidden.has(s.repo));
+  const visible = SITES.filter(s => !hidden.has(sid(s)));
   $('#grid').innerHTML = visible.map(s => cardShell(s, '<div class="skeleton"></div>')).join('');
   visible.forEach(renderCard);
-  const hid = SITES.filter(s => hidden.has(s.repo));
+  const hid = SITES.filter(s => hidden.has(sid(s)));
   $('#restore').innerHTML = hid.length ? `已隐藏 ${hid.map(s => s.title).join('、')} · <button data-restore>全部恢复</button>` : '';
 }
 function updatedOf(data) {
@@ -736,8 +740,8 @@ async function load() {
   const tasks = [
     getJSON('health.json').then(h => { HEALTH = h; }).catch(() => {}).finally(() => { renderHealth(); renderStrip(); SITES.forEach(renderCard); }),
     ...SITES.map(s => s.load()
-      .then(data => { cache[s.repo] = { data, updated: updatedOf(data) }; })
-      .catch(e => { if (!cache[s.repo]?.data) cache[s.repo] = { error: e.message || '网络错误' }; })
+      .then(data => { cache[sid(s)] = { data, updated: updatedOf(data) }; })
+      .catch(e => { if (!cache[sid(s)]?.data) cache[sid(s)] = { error: e.message || '网络错误' }; })
       .finally(() => { renderCard(s); renderStrip(); })),
   ];
   await Promise.allSettled(tasks);

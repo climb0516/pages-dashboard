@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="referrer" content="no-referrer">
   <title>Pages · 今日</title>
-  <meta name="description" content="所有 GitHub Pages 站点的今日要点与定时任务健康状况">
+  <meta name="description" content="所有 GitHub Pages 站点的入口与今日要点">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238b9cff'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,7 @@
 
     /* 1920×1080 画布，等比缩放铺满窗口 */
     #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0;
-      padding: 28px 40px 36px; display: grid; grid-template-rows: 56px 1fr; gap: 20px;
+      padding: 26px 40px 32px; display: grid; grid-template-rows: 52px 1fr; gap: 18px;
       background: radial-gradient(1100px 380px at 50% -120px, rgba(139,156,255,0.10), transparent 70%); }
 
     header { display: flex; align-items: center; gap: 20px; }
@@ -54,150 +54,135 @@
     .clock { font-size: 24px; font-weight: 500; letter-spacing: -0.01em; min-width: 72px; text-align: right; }
     .pill { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--hair-2); color: var(--text-2); font-size: 13.5px; display: inline-flex; align-items: center; }
     .pill:hover { color: var(--text-1); border-color: rgba(255,255,255,0.22); }
+    /* 站点健康：胶囊 + 每站一个小点（悬停看站名和问题） */
+    .hp { display: flex; align-items: center; gap: 12px; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--hair-2); font-size: 13.5px; color: var(--text-2); }
+    .hp b { color: var(--text-1); font-weight: 600; }
+    .dots { display: flex; gap: 4px; }
+    .dots a { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); position: relative; }
+    .dots a.ok { background: var(--ok); } .dots a.warn { background: var(--warn); } .dots a.error { background: var(--err); }
+    .dots a:hover::after { content: attr(data-t); position: absolute; top: 16px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #000;
+      border: 1px solid var(--hair-2); color: var(--text-1); font-size: 12px; padding: 4px 8px; border-radius: 6px; z-index: 5; }
 
-    /* 便当格：12 列 × 4 行 */
-    .bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 16px; min-height: 0; }
-    .card { position: relative; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; padding: 22px 24px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-    .card > * { flex-shrink: 0; }   /* 内容不被 flex 压扁裁字，只有图表 / 列表区可伸缩 */
-    .card > .spark, .card > .rows, .card > .sites, .card > .drama { flex-shrink: 1; }
-    .c-fx { grid-column: 1 / 6; grid-row: 1 / 3; }
-    .c-hot { grid-column: 1 / 4; grid-row: 3; }
-    .c-oil { grid-column: 1 / 4; grid-row: 4; }
-    .c-save { grid-column: 4 / 6; grid-row: 3; }
-    .c-resp { grid-column: 4 / 6; grid-row: 4; }
-    .c-health { grid-column: 6 / 10; grid-row: 1 / 4; }
-    .c-holiday { grid-column: 6 / 10; grid-row: 4; }
-    .c-macro { grid-column: 10 / 13; grid-row: 1; }
-    .c-ern { grid-column: 10 / 13; grid-row: 2; }
-    .c-apps { grid-column: 10 / 13; grid-row: 3; }
-    .c-apps .label { margin-bottom: 8px; }
-    .c-drama { grid-column: 10 / 13; grid-row: 4; }
-
-    .label { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text-2); font-weight: 500; margin-bottom: 14px; white-space: nowrap; }
-    .label a.go { margin-left: auto; color: var(--text-3); font-size: 12.5px; font-weight: 400; }
-    .label a.go:hover { color: var(--text-1); }
-    .label .r { margin-left: auto; color: var(--text-3); font-size: 12.5px; font-weight: 400; }
-    .big { font-weight: 600; letter-spacing: -0.035em; line-height: 1; }
-    .sub { color: var(--text-2); font-size: 14px; }
+    /* 便当格：7 列 × 5 行 */
+    .bento { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 14px; min-height: 0; }
+    .card { position: relative; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; padding: 16px 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; transition: border-color .15s; }
+    a.card:hover { border-color: var(--hair-2); }
+    .label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); font-weight: 500; white-space: nowrap; position: relative; z-index: 2; min-width: 0; }
+    .label .t { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .label .go { margin-left: auto; color: var(--text-3); font-size: 12px; font-weight: 400; flex-shrink: 0; }
+    a.card:hover .label .go { color: var(--text-1); }
+    .label .hd { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .hd.warn { background: var(--warn); } .hd.error { background: var(--err); }
+    .big { font-weight: 600; letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
+    .big small { font-size: .42em; font-weight: 500; color: var(--text-2); letter-spacing: 0; margin-left: 3px; }
+    .sub { color: var(--text-2); font-size: 13px; }
     .dim { color: var(--text-3); }
     .up { color: var(--up); } .down { color: var(--down); }
     .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-    .loading { color: var(--text-3); font-size: 14px; }
+    .loading { color: var(--text-3); font-size: 13px; margin-top: auto; }
+
+    /* 小格：标题 / 大数字 / 两行简要 */
+    .mini .big { font-size: 38px; margin-top: auto; overflow: hidden; text-overflow: ellipsis; }
+    .mini .l1 { margin-top: 9px; } .mini .l2 { margin-top: 1px; color: var(--text-3); }
+
+    /* 封面卡：图铺满，底部渐变压字 */
+    .cover { padding: 0; }
+    .cover .bg { position: absolute; inset: 0; background: center / cover no-repeat var(--card-2); transition: transform .6s; }
+    a.cover:hover .bg { transform: scale(1.04); }
+    .cover::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(180deg, rgba(11,11,12,.6) 0%, rgba(11,11,12,0) 26%, rgba(11,11,12,.35) 48%, rgba(11,11,12,.96) 100%); }
+    .cover .label { padding: 14px 18px 0; color: rgba(255,255,255,.85); }
+    .cover .label .go { color: rgba(255,255,255,.6); }
+    .cover .body { position: relative; z-index: 2; margin-top: auto; padding: 0 18px 16px; }
+    .cover .tt { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .cover .sub { color: rgba(255,255,255,.72); margin-top: 4px; }
+    .chip { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 5px; background: rgba(139,156,255,.22); color: #c9d0ff; margin: 0 6px 6px 0; }
+
+    /* 位置 */
+    .k-fx { grid-column: 1 / 3; grid-row: 1 / 3; padding: 20px 22px; }
+    .k-hot { grid-column: 3 / 5; grid-row: 1 / 3; padding: 0; }
+    .k-drama { grid-column: 5; grid-row: 1 / 3; }
+    .k-weekly { grid-column: 1 / 3; }
+    .k-weekend { grid-column: 3 / 5; }
+    .k-tools { grid-column: span 3; }
 
     /* 汇率 */
-    .fx-top { display: flex; align-items: flex-end; gap: 16px; }
-    .fx-top .big { font-size: 84px; }
-    .fx-chg { font-size: 22px; font-weight: 500; padding-bottom: 8px; }
-    .fx-pairs { display: flex; gap: 26px; margin-left: auto; padding-bottom: 6px; }
+    .fx-top { display: flex; align-items: flex-end; gap: 12px; margin-top: 12px; }
+    .fx-top .big { font-size: 70px; }
+    .fx-chg { font-size: 19px; font-weight: 500; padding-bottom: 7px; }
+    .fx-pairs { display: flex; gap: 20px; margin-top: 14px; }
     .fx-pairs div { display: flex; flex-direction: column; }
-    .fx-pairs span { font-size: 13px; color: var(--text-3); }
-    .fx-pairs b { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; }
-    .fx-pairs i { font-style: normal; font-size: 13px; }
-    .spark { flex: 1; min-height: 0; margin: 26px 0 12px; position: relative; }
+    .fx-pairs span { font-size: 12px; color: var(--text-3); }
+    .fx-pairs b { font-size: 18px; font-weight: 600; }
+    .fx-pairs i { font-style: normal; font-size: 12px; }
+    .spark { flex: 1; min-height: 0; margin: 12px 0 6px; position: relative; }
     .spark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-    .fx-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding-top: 16px; border-top: 1px solid var(--hair); }
-    .fx-foot .k { font-size: 12.5px; color: var(--text-3); margin-bottom: 8px; display: flex; justify-content: space-between; }
-    .fx-foot .k b { color: var(--text-1); font-weight: 600; }
-    .track { position: relative; height: 4px; border-radius: 999px; background: var(--card-2); margin-top: 12px; }
-    .track .dot { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: var(--text-1); transform: translate(-50%, -50%); box-shadow: 0 0 0 4px var(--card); }
-    .track-scale { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+    .fx-foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-3); gap: 12px; }
 
-    /* 列表 */
-    .rows { display: flex; flex-direction: column; min-height: 0; }
-    .row { display: flex; align-items: center; gap: 14px; height: 44px; border-bottom: 1px solid var(--hair); font-size: 15px; min-width: 0; }
+    /* 热榜：上半头图，下半榜单 */
+    .hero { position: relative; height: 52%; overflow: hidden; flex-shrink: 0; }
+    .hero .bg { position: absolute; inset: 0; background: center / cover no-repeat var(--card-2); transition: transform .6s; }
+    .k-hot:hover .hero .bg { transform: scale(1.04); }
+    .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,12,.6), rgba(11,11,12,0) 30%, rgba(21,21,23,0) 50%, var(--card) 100%); }
+    .hero .label { position: absolute; top: 14px; left: 18px; right: 18px; color: rgba(255,255,255,.85); }
+    .hero .label .go { color: rgba(255,255,255,.6); }
+    .hero .tt { position: absolute; left: 18px; right: 18px; bottom: 8px; z-index: 2; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+    .k-hot.noimg .hero { height: auto; padding: 16px 18px 6px; } .k-hot.noimg .hero::after { display: none; }
+    .k-hot.noimg .hero .label { position: static; color: var(--text-2); } .k-hot.noimg .hero .tt { position: static; margin-top: 12px; }
+    .rows { display: flex; flex-direction: column; padding: 4px 18px 12px; flex: 1; justify-content: space-evenly; min-height: 0; }
+    .row { display: flex; align-items: center; gap: 12px; height: 34px; font-size: 14.5px; border-bottom: 1px solid var(--hair); min-width: 0; }
     .row:last-child { border-bottom: 0; }
-    a.row:hover .ell { color: var(--accent); }
-    .rk { width: 20px; flex-shrink: 0; color: var(--text-3); font-weight: 600; font-size: 14px; }
+    .rk { width: 16px; flex-shrink: 0; color: var(--text-3); font-weight: 600; font-size: 13px; }
     .rk.top { color: var(--text-1); }
-    .row .r { margin-left: auto; color: var(--text-3); font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+    .row .r { margin-left: auto; color: var(--text-3); font-size: 12.5px; white-space: nowrap; flex-shrink: 0; }
+    .row .th { width: 46px; height: 28px; border-radius: 5px; flex-shrink: 0; background: center / cover no-repeat var(--card-2); }
 
-    /* 定投 */
-    .seg { display: flex; height: 6px; gap: 3px; margin: 16px 0 10px; }
-    .seg i { border-radius: 999px; }
-    .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--text-2); flex-wrap: wrap; }
-    .legend span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: var(--c); vertical-align: 1px; }
+    /* 本周上新：海报 */
+    .posters { display: grid; grid-template-columns: repeat(3, 76px) minmax(0, 1fr); gap: 10px; margin-top: 10px; flex: 1; min-height: 0; }
+    .posters i { border-radius: 8px; background: center / cover no-repeat var(--card-2); }
+    .posters .info { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; padding-left: 6px; }
+    .posters .info .big { font-size: 36px; }
+    /* 周末：展览海报 + 天气 */
+    .wk { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; margin-top: 10px; flex: 1; min-height: 0; }
+    .wk i { border-radius: 8px; background: center / cover no-repeat var(--card-2); }
+    .wk .r2 { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+    .wk-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: end; }
+    .wk-body .days { display: flex; gap: 8px; }
+    .wk-body .days div { background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 6px 10px; }
+    .wk-body .days b { font-size: 16px; font-weight: 600; display: block; white-space: nowrap; }
+    .wk-body .days span { font-size: 11.5px; color: rgba(255,255,255,.75); white-space: nowrap; }
+    /* 车市：车图 */
+    .car-img { position: absolute; right: 6px; top: 34px; width: 50%; opacity: .9; pointer-events: none; }
+    .k-car .big, .k-car .sub { position: relative; z-index: 1; }
+    /* 赛程：队徽 vs 队徽 */
+    .vs { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding: 0 6px; }
+    .vs img { width: 52px; height: 52px; object-fit: contain; }
+    .vs span { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+    /* 竞品：图标 */
+    .icons { display: flex; gap: 7px; margin-top: 10px; }
+    .icons img { width: 32px; height: 32px; border-radius: 8px; background: var(--card-2); }
+    /* 工具 */
+    .tools { display: flex; gap: 10px; margin-top: auto; }
+    .tools a { flex: 1; min-width: 0; background: var(--card-2); border-radius: 12px; padding: 10px 14px; font-size: 15px; font-weight: 600; transition: color .15s; }
+    .tools a span { display: block; font-size: 12px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
+    .tools a:hover { color: var(--accent); }
 
-    /* 站点健康 */
-    .h-head { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 6px; }
-    .h-head .big { font-size: 64px; }
-    .h-head .sub { padding-bottom: 6px; }
-    .chips { display: flex; gap: 8px; margin: 10px 0 14px; }
-    .chip { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: var(--card-2); color: var(--text-2); }
-    .chip::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c); margin-right: 6px; vertical-align: 1px; }
-    .sites { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    .site { flex: 1; display: grid; grid-template-columns: 10px minmax(0, 1fr) 96px 120px 44px; align-items: center; gap: 14px;
-      padding: 0 12px; margin: 0 -12px; border-radius: 12px; min-height: 0; }
-    .site + .site { border-top: 1px solid var(--hair); }
-    .site:hover { background: rgba(255,255,255,0.025); }
-    .site.bad { background: rgba(255,107,107,0.07); border-top-color: transparent; }
-    .site.bad + .site { border-top-color: transparent; }
-    .site.warning { background: rgba(245,185,74,0.06); border-top-color: transparent; }
-    .site .st { width: 8px; height: 8px; border-radius: 50%; }
-    .site .nm { min-width: 0; }
-    .site .nm b { display: block; font-weight: 500; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .site .nm small { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .site .when { font-size: 13px; color: var(--text-2); text-align: right; white-space: nowrap; }
-    .life { height: 4px; border-radius: 999px; background: var(--card-2); overflow: hidden; }
-    .life i { display: block; height: 100%; border-radius: 999px; }
-    .site .left { font-size: 13px; color: var(--text-2); text-align: right; }
-
-    /* 右列 */
-    .macro-cd { font-size: 50px; }
-    .macro-cd small { font-size: 24px; font-weight: 500; color: var(--text-2); letter-spacing: -0.01em; margin: 0 6px 0 2px; }
-    .kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--text-2); margin-top: auto; padding-top: 12px; border-top: 1px solid var(--hair); }
-    .kv b { color: var(--text-1); font-weight: 500; }
-    .tickers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .tk { background: var(--card-2); border-radius: 12px; padding: 9px 12px; min-width: 0; }
-    .tk b { font-size: 15px; font-weight: 600; }
-    .tk span { display: block; font-size: 12px; color: var(--text-3); }
-    .app { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto 52px; align-items: center; gap: 12px; height: 42px; }
-    .app img { width: 32px; height: 32px; border-radius: 8px; }
-    .app b { display: block; font-size: 14.5px; font-weight: 500; }
-    .app small { display: block; font-size: 12px; color: var(--text-3); }
-    .app .pos { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; text-align: right; }
-    .app .star { font-size: 13px; color: var(--text-2); text-align: right; }
-    .gripe { font-size: 12.5px; color: var(--text-3); margin-top: auto; padding-top: 4px; }
-    .gripe b { color: var(--text-1); font-weight: 500; }
-
-    .drama { position: relative; flex: 1; min-height: 0; }
-    .slide { position: absolute; inset: 0; display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 16px; align-content: start; opacity: 0; transition: opacity .9s ease; pointer-events: none; }
-    .slide.on { opacity: 1; pointer-events: auto; }
-    .slide .cv { width: 80px; height: 112px; border-radius: 10px; overflow: hidden; background: var(--card-2); }
-    .slide .cv img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .slide b { font-size: 16px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .slide .tag { font-size: 12.5px; color: var(--accent); margin: 6px 0 4px; }
-    .slide p { font-size: 12.5px; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .senti { padding-top: 10px; border-top: 1px solid var(--hair); }
-    .senti .k { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-3); margin-bottom: 8px; }
-
-    .c-hot .row { height: 36px; font-size: 14px; }
-    /* 小卡片：一个主数字 + 两行要点 */
-    .mini-big { font-size: 46px; }
-    .mini-big small { font-size: 18px; font-weight: 500; color: var(--text-2); margin-left: 4px; letter-spacing: -0.01em; }
-    .mini-lines { margin-top: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); }
-    .mini-lines b { color: var(--text-1); font-weight: 500; }
-    .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; min-height: 0; }
-    .duo > div { display: flex; flex-direction: column; min-width: 0; }
-    .duo > div + div { border-left: 1px solid var(--hair); padding-left: 20px; }
-
-    /* 手机：不缩放，单列 */
+    /* 手机：取消画布缩放，两列可滚动 */
     @media (max-width: 760px) {
       body { overflow: auto; }
-      #stage { position: static; width: auto; height: auto; transform: none !important; padding: 16px 16px 32px; display: block; }
-      header { flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-      header .meta { display: none; }
-      .bento { display: flex; flex-direction: column; }
-      .card { min-height: 220px; }
-      .c-fx { min-height: 520px; }
-      .c-health { min-height: 860px; }
-      .fx-top .big { font-size: 64px; }
-      .fx-top { flex-wrap: wrap; }
-      .fx-pairs { gap: 20px; margin-left: 0; width: 100%; }
-      .fx-foot { grid-template-columns: 1fr; gap: 18px; }
-      .spark { flex: none; height: 140px; }
-      .c-fx { min-height: 0; }
-      .site { grid-template-columns: 10px minmax(0, 1fr) 70px 60px 36px; gap: 10px; }
+      #stage { position: static; width: auto; height: auto; transform: none !important; padding: 16px 14px 28px; display: block; background: none; }
+      header { flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+      .meta, .clock, #fs { display: none; }
+      .hp { order: 3; width: 100%; height: auto; padding: 8px 12px; flex-wrap: wrap; border-radius: 12px; row-gap: 6px; }
+      #hpText { white-space: nowrap; } .dots { flex-wrap: wrap; }
+      .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 158px; gap: 10px; }
+      .bento > * { grid-column: auto !important; grid-row: auto !important; }
+      .k-fx, .k-hot { grid-column: 1 / 3 !important; grid-row: span 2 !important; }
+      .k-drama { grid-row: span 2 !important; }
+      .k-weekly, .k-weekend, .k-tools { grid-column: 1 / 3 !important; }
+      .fx-top .big { font-size: 50px; } .mini .big { font-size: 30px; }
+      .tools { flex-direction: column; gap: 6px; } .k-tools { grid-row: span 2 !important; }
     }
   </style>
 </head>
@@ -206,33 +191,26 @@
   <header>
     <div class="brand"><b>Pages</b><span id="date"></span></div>
     <div class="spacer"></div>
+    <span class="hp" id="hp"><span id="hpText">检查中…</span><span class="dots" id="dots"></span></span>
     <span class="meta" id="metaLine"></span>
     <span class="clock" id="clock">--:--</span>
     <button class="pill" id="fs" title="全屏（F）">全屏</button>
     <a class="pill" href="detail.html">详情</a>
   </header>
-
-  <div class="bento">
-    <section class="card c-fx" id="fx"><div class="label">汇率</div><div class="loading">加载中…</div></section>
-    <section class="card c-hot"><div class="label">全网热榜<a class="go" href="https://climb0516.github.io/hot-news/" target="_blank" rel="noopener">hot-news ↗</a></div><div class="rows" id="hot"><div class="loading">加载中…</div></div></section>
-    <section class="card c-oil" id="oil"><div class="label">油价 · 金价</div><div class="loading">加载中…</div></section>
-    <section class="card c-save" id="save"><div class="label">存款利率</div><div class="loading">加载中…</div></section>
-    <section class="card c-resp" id="resp"><div class="label">呼吸道</div><div class="loading">加载中…</div></section>
-    <section class="card c-health" id="health"><div class="label">站点健康</div><div class="loading">加载中…</div></section>
-    <section class="card c-holiday" id="holiday"><div class="label">拼假</div><div class="loading">加载中…</div></section>
-    <section class="card c-macro" id="macro"><div class="label">下一个高影响事件</div><div class="loading">加载中…</div></section>
-    <section class="card c-ern" id="ern"><div class="label">本周关注财报</div><div class="loading">加载中…</div></section>
-    <section class="card c-apps" id="apps"><div class="label">竞品</div><div class="loading">加载中…</div></section>
-    <section class="card c-drama" id="drama"><div class="label">短剧</div><div class="loading">加载中…</div></section>
-  </div>
+  <div class="bento" id="bento"></div>
 </div>
 
+<script src="sites.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const ORIGIN = 'https://climb0516.github.io/';
+// ?origin=http://localhost:端口/ 可让大屏读本地各站数据（推送前联调用），默认读线上
+const ORIGIN = new URLSearchParams(location.search).get('origin') || 'https://climb0516.github.io/';
 const REFRESH_MS = 10 * 60 * 1000;
-const LV = { ok: 'var(--ok)', warn: 'var(--warn)', error: 'var(--err)' };
+const SUPABASE_URL = 'https://sqrzrvstlvxqxdxvhlxz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxcnpydnN0bHZ4cXhkeHZobHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTUzMjAsImV4cCI6MjA5NjU5MTMyMH0.C6Gz61TB3GhLnbDWywogGZDcqTu1G2ta9-Dyo60Yiho';   // tech-news 页面公开的 anon 只读 key
+const SITES = window.PAGES_SITES || [];
+const siteUrl = repo => SITES.find(s => s.repo === repo)?.url || ORIGIN + repo + '/';
 
 // ── 工具（与 detail.html 保持一致） ──
 const getJSON = (url, opt = {}) => fetch(url, { cache: 'no-cache', ...opt }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
@@ -246,228 +224,338 @@ function ago(t) {
 function cdParts(t) {                                   // 倒计时拆成 [[数, 单位], ...]，只取前两段
   const s = Math.max(0, (new Date(t) - Date.now()) / 1000);
   const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-  return (d ? [[d, '天'], [h, '小时']] : h ? [[h, '小时'], [m, '分']] : [[m, '分钟']]);
+  return (d ? [[d, '天'], [h, '时']] : h ? [[h, '时'], [m, '分']] : [[m, '分钟']]);
 }
-const cdText = t => cdParts(t).map(([n, u]) => n + u).join(' ');
-const fmtCST = t => new Date(t).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+const fmtCST = t => new Date(t).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
 const pct = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}%`;
 const cls = v => v > 0.0001 ? 'up' : v < -0.0001 ? 'down' : 'dim';
 const within = (t, days) => t && Date.now() - new Date(t) < days * 86400000;
-const label = (text, go) => `<div class="label">${text}${go ? `<a class="go" href="${ORIGIN}${go}/" target="_blank" rel="noopener">${go} ↗</a>` : ''}</div>`;
+const todayCN = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+const dayDiff = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400e3);
+const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+const bgUrl = u => `url('${String(u).replace(/'/g, '%27')}')`;
 
-// ── 汇率 ──
-function renderFx(d) {
-  const R = d.ref.rates, days = Object.keys(d.history).sort();
-  const h = (day, a, b) => { const x = { USD: 1, ...d.history[day] }; return x[b] / x[a]; };
-  const chg = (a, b) => (h(days.at(-1), a, b) / h(days.at(-2), a, b) - 1) * 100;
-  const c = chg('USD', 'CNY');
-  const recent = days.slice(-90), vals = recent.map(x => h(x, 'USD', 'CNY'));
-  const min = Math.min(...vals), max = Math.max(...vals), W = 700, H = 160;
-  const X = i => i / (vals.length - 1) * W, Y = v => 8 + (1 - (v - min) / ((max - min) || 1)) * (H - 16);
-  const line = vals.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('');
-  const pos = Math.min(100, Math.max(0, (R.HKD - 7.75) / 0.1 * 100));
-  const cf = d.cfets || {}, cfDay = Object.keys(cf).sort().pop(), gap = cfDay ? (cf[cfDay].USD / R.CNY - 1) * 100 : null;
-  const chg90 = (vals.at(-1) / vals[0] - 1) * 100;
-  $('#fx').innerHTML = label('美元 / 人民币', 'fx-board') + `
-    <div class="fx-top"><span class="big">${R.CNY.toFixed(4)}</span><span class="fx-chg ${cls(c)}">${pct(c)}</span>
-    <div class="fx-pairs">${[['HKD', 'CNY'], ['USD', 'HKD'], ['EUR', 'CNY']].map(([a, b]) => {
-      const x = chg(a, b);
-      return `<div><span>${a}/${b}</span><b>${(R[b] / R[a]).toFixed(4)}</b><i class="${cls(x)}">${pct(x)}</i></div>`;
-    }).join('')}</div></div>
-    <div class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-      <defs><linearGradient id="fxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b9cff" stop-opacity=".22"/><stop offset="1" stop-color="#8b9cff" stop-opacity="0"/></linearGradient></defs>
-      <path d="${line}L${W},${H}L0,${H}Z" fill="url(#fxg)"/>
-      <path d="${line}" fill="none" stroke="#8b9cff" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
-    </svg></div>
-    <div class="sub" style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:16px">
-      <span class="dim">近 90 日 · ${recent[0].slice(5)} – ${recent.at(-1).slice(5)}</span>
-      <span><span class="dim">高</span> ${max.toFixed(4)} <span class="dim" style="margin-left:10px">低</span> ${min.toFixed(4)} <span class="${cls(chg90)}" style="margin-left:10px">${pct(chg90)}</span></span></div>
-    <div class="fx-foot">
-      <div><div class="k"><span>联系汇率 USD/HKD</span><b>${R.HKD.toFixed(4)}</b></div>
-        <div class="track"><span class="dot" style="left:${pos}%"></span></div>
-        <div class="track-scale"><span>7.75</span><span>${pos >= 90 ? '贴近弱方兑换保证' : pos <= 10 ? '贴近强方兑换保证' : '区间内'}</span><span>7.85</span></div></div>
-      <div><div class="k"><span>人民币中间价</span><b>${cfDay ? cf[cfDay].USD.toFixed(4) : '—'}</b></div>
-        <div class="sub" style="font-size:13.5px;margin-top:6px">${gap !== null ? `市场价比中间价${gap > 0 ? '强' : '弱'} <b style="color:var(--text-1);font-weight:500">${Math.abs(gap).toFixed(2)}%</b>` : ''}</div>
-        <div class="dim" style="font-size:12px;margin-top:4px">${gap !== null ? `用中间价折算美元资产会${gap > 0 ? '偏高' : '偏低'}` : ''}</div></div>
-    </div>`;
-}
-
-// ── 存款利率 ──
-function renderSave(d) {
-  const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
-  const bond = t => d.bonds.flatMap(b => b.items).find(i => i.term === t)?.rate;
-  const live = d.bonds.find(b => b.start <= today && today <= b.end);
-  // 下期国债：已有公告用公告日期，否则按 3–11 月每月 10 日推算
-  let next = d.bonds.filter(b => b.start > today).sort((a, b) => a.start.localeCompare(b.start))[0]?.start;
-  if (!next) {
-    let y = +today.slice(0, 4), m = +today.slice(5, 7) + (+today.slice(8, 10) > 10 ? 1 : 0);
-    if (m > 11 || m < 3) { if (m > 11) y++; m = 3; }
-    next = `${y}-${String(m).padStart(2, '0')}-10`;
-  }
-  const days = Math.round((new Date(next) - new Date(today)) / 86400000);
-  $('#save').innerHTML = label('大行 3 年定期', 'savings-rates') + `
-    <div class="big mini-big">${d.deposit.rates['3年'].toFixed(2)}<small>%</small></div>
-    <div class="mini-lines"><span>储蓄国债 <b>${bond(3)?.toFixed(2) ?? '—'}% / ${bond(5)?.toFixed(2) ?? '—'}%</b></span>
-      <span>下期国债 <b>${live ? '发售中' : days + ' 天后'}</b>${live ? '' : ` · ${+next.slice(5, 7)}月${+next.slice(8, 10)}日`}</span></div>`;
-}
-
-// ── 呼吸道 ──
-function renderResp(d) {
-  const w = d.weeks[0];
-  const SHORT = { '新型冠状病毒': '新冠', '流感病毒': '流感', '呼吸道合胞病毒': '合胞病毒', '人偏肺病毒': '人偏肺', '副流感病毒': '副流感' };
-  const [name, top] = Object.entries(w.outpatient).sort((a, b) => b[1].rate - a[1].rate)[0] || [];
-  const chg = c => c == null ? '' : `<span class="${c > 0 ? 'up' : c < 0 ? 'down' : 'dim'}">${c > 0 ? '↑' : c < 0 ? '↓' : ''}${c ? Math.abs(c).toFixed(1) : '持平'}</span>`;
-  const cv = w.outpatient['新型冠状病毒'];
-  $('#resp').innerHTML = label(`呼吸道 · 第 ${w.week} 周`, 'health-weekly') + `
-    <div class="big mini-big">${esc(SHORT[name] || name || '—')}<small>${top ? top.rate + '%' : ''} ${chg(top?.chg)}</small></div>
-    <div class="mini-lines"><span>南方 <b>${esc((w.level?.south || '—').replace('水平', ''))}</b> · 北方 <b>${esc((w.level?.north || '—').replace('水平', ''))}</b></span>
-      <span>新冠 <b>${cv?.rate ?? '—'}%</b> ${chg(cv?.chg)}</span></div>`;
-}
-
-// ── 油价金价（国内习惯：涨红跌绿）──
-function renderOil(d) {
-  const o = d.oil, e = o.estimate || {}, au = d.gold?.quotes?.au9999;
-  const vc = e.verdict === '上调' ? 'up' : e.verdict === '下调' ? 'down' : 'dim';
-  const brand = (d.gold?.brands || []).find(b => !/批发/.test(b.name));
-  $('#oil').innerHTML = label('油价 · 金价', 'oil-gold') + `<div class="duo">
-    <div><span class="sub" style="font-size:12.5px">下次油价调整</span>
-      <div class="big mini-big">${o.next_window?.days ?? '—'}<small>天</small></div>
-      <div class="mini-lines"><span>本轮预测 <b class="${vc}">${esc(e.verdict || '—')}</b>${e.verdict && e.verdict !== '搁浅' ? ` 约 ${Math.abs(e.est_ton)} 元/吨` : ''}</span>
-        <span>92# 全国均价 <b>${o.national?.v92 ?? '—'}</b> 元/升</span></div></div>
-    <div><span class="sub" style="font-size:12.5px">上金所 Au9999</span>
-      <div class="big mini-big">${au ? au.price.toFixed(0) : '—'}<small>元/克</small></div>
-      <div class="mini-lines"><span>今日 <b class="${au?.chg_pct > 0 ? 'up' : au?.chg_pct < 0 ? 'down' : 'dim'}">${au ? (au.chg_pct > 0 ? '+' : '') + au.chg_pct.toFixed(2) + '%' : '—'}</b></span>
-        <span>${brand ? `首饰 <b>${brand.gold}</b> · 溢价 ${Math.round(brand.premium)}%` : ''}</span></div></div>
-  </div>`;
-}
-
-// ── 热榜 ──
-function renderHot(d) {
-  $('#hot').innerHTML = d.events.slice(0, 4).map((e, i) => `<a class="row" href="${esc(e.platforms[0]?.url)}" target="_blank" rel="noopener">
-    <span class="rk ${i < 3 ? 'top' : ''}">${i + 1}</span><span class="ell">${esc(e.title)}</span><span class="r">${e.platforms.length} 个平台</span></a>`).join('');
-}
-
-// ── 宏观 + 财报 ──
-let MACRO = null;
-function renderMacro(d) {
-  MACRO = d;
-  const now = Date.now();
-  const future = d.macro.filter(m => m.time && new Date(m.time) > now).sort((a, b) => new Date(a.time) - new Date(b.time));
-  const next = future.find(m => m.impact === 'High');
-  const fomc = future.find(m => m.kind === 'fomc');
-  $('#macro').innerHTML = label('下一个高影响事件', 'earnings-calendar') + (next ? `
-    <div class="big macro-cd">${cdParts(next.time).map(([n, u]) => `${n}<small>${u}</small>`).join('')}</div>
-    <div style="font-size:17px;font-weight:500;margin-top:10px;line-height:1.5" class="ell">${esc(next.title)}</div>
-    <div class="sub" style="font-size:13px;margin-top:4px">${fmtCST(next.time)} · ${esc(next.country || '')}${next.forecast ? ` · 预期 ${esc(next.forecast)}` : ''}</div>` : '<div class="loading">暂无</div>') +
-    (fomc ? `<div class="kv"><span>下次 FOMC</span><span><b>${cdText(fomc.time)}</b> · ${fmtCST(fomc.time)}</span></div>` : '');
-
-  const week = new Date(d.today_et); week.setDate(week.getDate() + 7);
-  const weekISO = week.toISOString().slice(0, 10);
-  const ern = d.earnings.filter(e => e.watch && e.date >= d.today_et && e.date <= weekISO).sort((a, b) => a.date.localeCompare(b.date));
-  const T = { bmo: '盘前', amc: '盘后', tbd: '待定' };
-  $('#ern').innerHTML = `<div class="label">本周关注财报<span class="r">${ern.length} 家 · 关注 ${Object.keys(d.watchlist || {}).length}</span></div>` +
-    (ern.length ? `<div class="tickers">${ern.slice(0, 6).map(e => `<div class="tk"><b>${esc(e.symbol)}</b><span class="ell">${e.date.slice(5).replace('-', '/')} ${T[e.time] || ''} · ${esc(e.name.replace(/,? Inc\.?$|\.com|Corporation/g, ''))}</span></div>`).join('')}</div>`
-      : '<div class="loading">未来 7 天关注公司没有财报</div>');
-}
-
-// ── 竞品 ──
-function renderApps(d) {
-  const keys = ['hk:1470042146', 'hk:592031984', 'hk:1023600494'];
-  const rows = keys.map(k => d.apps.find(a => a.key === k)).filter(Boolean);
-  const topics = {};
-  d.apps.forEach(a => Object.entries(a.review_stats?.topics || {}).forEach(([k, v]) => topics[k] = (topics[k] || 0) + (typeof v === 'number' ? v : v?.neg || 0)));
-  const top = Object.entries(topics).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => (d.topics || []).find(t => t.id === id)?.name || id);
-  const recent = d.apps.filter(a => within(a.version_date, 7)).length;
-  $('#apps').innerHTML = `<div class="label">竞品 · 财经榜排名<a class="go" href="${ORIGIN}appstore-tracker/" target="_blank" rel="noopener">appstore-tracker ↗</a></div>` +
-    rows.map(a => `<a class="app" href="${esc(a.url)}" target="_blank" rel="noopener"><img src="${esc(a.icon)}" alt="" onerror="this.style.visibility='hidden'">
-      <span class="ell"><b>${esc(a.name)}</b><small>v${esc(a.version)} · ${ago(a.version_date)}</small></span>
-      <span class="pos">${a.rank ? '#' + a.rank : '<span class="dim" style="font-size:13px;font-weight:400">未上榜</span>'}</span><span class="star">★ ${a.rating?.toFixed(2) ?? '—'}</span></a>`).join('') +
-    `<div class="gripe">7 天内 <b>${recent}</b> 个竞品发版${top.length ? ` · 吐槽最多 <b>${top.map(esc).join('、')}</b>` : ''}</div>`;
-}
-
-// ── 短剧 ──
-let dramaTimer = null;
-function renderDrama([p, d]) {
-  const items = p.items.slice(0, 6);
-  const week = d.ai.filter(n => within(n.time, 7));
-  const c = { positive: 0, neutral: 0, negative: 0 };
-  week.forEach(n => c[n.sentiment]++);
-  $('#drama').innerHTML = label('本周热门短剧', 'short-drama') + `<div class="drama">${items.map((i, k) => `<a class="slide ${k ? '' : 'on'}" href="${ORIGIN}short-drama/" target="_blank" rel="noopener">
-      <div class="cv">${i.cover ? `<img src="${ORIGIN}short-drama/${esc(i.cover)}" alt="" onerror="this.remove()">` : ''}</div>
-      <div style="min-width:0"><b>${esc(i.title)}</b><div class="tag">${esc(i.form)} · ${esc(i.rank_note.split('；')[0])}</div><p>${esc(i.synopsis || '')}</p></div></a>`).join('')}</div>
-    <div class="senti"><div class="k"><span>AI 对行业影响 · 近 7 天 ${week.length} 篇</span><span><span class="down">正 ${c.positive}</span> · 中 ${c.neutral} · <span class="up">负 ${c.negative}</span></span></div>
-      <div class="seg" style="margin:0"><i style="flex:${c.positive || 0.0001};background:var(--ok)"></i><i style="flex:${c.neutral || 0.0001};background:var(--text-3)"></i><i style="flex:${c.negative || 0.0001};background:var(--err)"></i></div></div>`;
-  clearInterval(dramaTimer);
-  let cur = 0;
-  dramaTimer = setInterval(() => {
-    const s = document.querySelectorAll('#drama .slide');
-    if (s.length < 2) return;
-    s[cur].classList.remove('on'); cur = (cur + 1) % s.length; s[cur].classList.add('on');
-  }, 8000);
-}
-
-// ── 拼假 ──
-function renderHoliday(d) {
-  const s = d.summary, n = s.next, md = t => `${+t.slice(5, 7)}/${+t.slice(8)}`;
-  $('#holiday').innerHTML = label(`拼假<span class="dim" style="margin-left:4px">· ${s.plan_year} ${s.plan_official ? '官方安排' : '预估'}</span>`, 'holiday-planner') +
-    `<div style="display:flex;gap:28px;min-height:0;flex:1">
-      <div style="flex-shrink:0">${n ? `<div class="big macro-cd">${n.days}<small>天</small></div>
-        <div style="font-size:15px;font-weight:500;margin-top:10px">${esc(n.name)} · ${md(n.date)}${n.est ? '<span class="dim">（预估）</span>' : ''}</div>
-        <div class="sub" style="font-size:13px;margin-top:4px">还要上 ${n.workdays} 天班</div>` : '<div class="loading">暂无</div>'}</div>
-      <div class="rows" style="flex:1;min-width:0">${s.top.slice(0, 3).map(p => `<div class="row" style="height:auto;padding:7px 0">
-        <span class="ell">${esc(p.names.join('、'))} <span class="dim">${md(p.from)}–${md(p.to)}</span></span><span class="r">请 ${p.used} → 休 <b style="color:var(--text-1)">${p.len}</b></span></div>`).join('')}</div>
-    </div>`;
-}
-
-// ── 站点健康 ──
+// 卡片外壳：整张卡片是进站链接；标题前的小圆点来自健康检查
 let HEALTH = null;
-function renderHealth() {
-  if (!HEALTH) return;
-  const rs = HEALTH.repos;
-  const n = l => rs.filter(r => r.level === l).length;
-  const ok = n('ok');
-  const sites = rs.map(r => {
-    const wf = r.workflows || [];
-    const hasCron = wf.some(w => w.cron);
-    const last = wf.map(w => w.last_run?.created_at).filter(Boolean).sort().pop();
-    const left = Math.max(0, Math.min(60, r.days_left ?? 0));
-    const lc = left < 7 ? 'var(--err)' : left < 14 ? 'var(--warn)' : 'var(--text-2)';
-    const issue = r.issues[0]?.text;
-    return `<a class="site ${r.level === 'error' ? 'bad' : r.level === 'warn' ? 'warning' : ''}" href="${esc(r.level === 'ok' ? r.page : r.repo_url + '/actions')}" target="_blank" rel="noopener" title="${esc(r.issues.map(i => i.text).join('\n') || '运行正常')}">
-      <span class="st" style="background:${LV[r.level]}"></span>
-      <span class="nm"><b>${esc(r.name)}</b><small style="color:${issue ? LV[r.level] : 'var(--text-3)'}">${esc(issue || (hasCron ? wf.filter(w => w.cron).map(w => w.interval_h >= 24 ? '每天' : `每 ${w.interval_h} 小时`).join(' · ') : '静态页面'))}</small></span>
-      <span class="when">${wf.length ? ago(last) : '—'}</span>
-      ${hasCron ? `<span class="life"><i style="width:${left / 60 * 100}%;background:${lc}"></i></span><span class="left">${Math.round(left)} 天</span>` : '<span></span><span></span>'}
-    </a>`;
+const lvOf = repo => HEALTH?.repos?.find(r => r.name === repo)?.level;
+function label(title, repo) {
+  const lv = lvOf(repo);
+  return `<div class="label">${lv === 'warn' || lv === 'error' ? `<i class="hd ${lv}"></i>` : ''}<span class="t">${title}</span><span class="go">${repo} ↗</span></div>`;
+}
+const mini = (title, repo, big, l1, l2) => label(title, repo) + `<div class="big">${big}</div><div class="sub l1 ell">${l1}</div><div class="sub l2 ell">${l2}</div>`;
+
+// ── 各站卡片：key 对应格子，load 拉数据，render 返回卡片内部 HTML ──
+const CARDS = [
+  { key: 'fx', repo: 'market-board', load: () => Promise.all([getJSON(ORIGIN + 'market-board/market.json'), getJSON(ORIGIN + 'market-board/fx.json')]), render([m, d]) {
+    const IDX = [['1.000001', '上证指数'], ['100.HSI', '恒生指数'], ['100.NDX', '纳斯达克100']];
+    const idx = IDX.map(([id, n]) => { const q = m.quotes?.[id];
+      return `<div><span>${n}</span><b>${typeof q?.f2 === 'number' ? q.f2.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}</b><i class="${cls(q?.f3 ?? 0)}">${typeof q?.f3 === 'number' ? pct(q.f3) : ''}</i></div>`; }).join('');
+    const R = d.ref.rates, days = Object.keys(d.history).sort();
+    const h = (day, a, b) => { const x = { USD: 1, ...d.history[day] }; return x[b] / x[a]; };
+    const chg = (a, b) => (h(days.at(-1), a, b) / h(days.at(-2), a, b) - 1) * 100;
+    const recent = days.slice(-90), vals = recent.map(x => h(x, 'USD', 'CNY'));
+    const min = Math.min(...vals), max = Math.max(...vals), W = 700, H = 160;
+    const X = i => i / (vals.length - 1) * W, Y = v => 8 + (1 - (v - min) / ((max - min) || 1)) * (H - 16);
+    const line = vals.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('');
+    const c = chg('USD', 'CNY'), chg90 = (vals.at(-1) / vals[0] - 1) * 100;
+    return label('市场 · 汇率', 'market-board') + `
+      <div class="fx-pairs">${idx}</div>
+      <div class="fx-top"><span class="big">${R.CNY.toFixed(4)}</span><span class="fx-chg dim">USD/CNY</span><span class="fx-chg ${cls(c)}">${pct(c)}</span></div>
+      <div class="fx-pairs">${[['HKD', 'CNY'], ['USD', 'HKD'], ['EUR', 'CNY']].map(([a, b]) => { const x = chg(a, b);
+        return `<div><span>${a}/${b}</span><b>${(R[b] / R[a]).toFixed(4)}</b><i class="${cls(x)}">${pct(x)}</i></div>`; }).join('')}</div>
+      <div class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs><linearGradient id="fxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b9cff" stop-opacity=".3"/><stop offset="1" stop-color="#8b9cff" stop-opacity="0"/></linearGradient></defs>
+        <path d="${line}L${W},${H}L0,${H}Z" fill="url(#fxg)"/><path d="${line}" fill="none" stroke="#8b9cff" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></div>
+      <div class="fx-foot"><span>近 90 日 · ${md(recent[0])} – ${md(recent.at(-1))}</span><span>高 ${max.toFixed(4)} · 低 ${min.toFixed(4)} · <span class="${cls(chg90)}">${pct(chg90)}</span></span></div>`;
+  } },
+
+  { key: 'hot', repo: 'hot-news', load: () => getJSON(ORIGIN + 'hot-news/data.json'), render(d, el) {
+    const ev = d.events.slice(0, 5), img = ev[0]?.image;
+    el.classList.toggle('noimg', !img);
+    return `<div class="hero">${img ? `<div class="bg" style="background-image:${bgUrl(img)}"></div>` : ''}
+        ${label('全网热榜', 'hot-news')}<div class="tt ell">1 · ${esc(ev[0]?.title || '—')}</div></div>
+      <div class="rows">${ev.slice(1).map((e, i) => `<div class="row"><span class="rk ${i < 2 ? 'top' : ''}">${i + 2}</span>${e.image ? `<i class="th" style="background-image:${bgUrl(e.image)}"></i>` : ''}<span class="ell">${esc(e.title)}</span><span class="r">${e.platforms.length} 个平台</span></div>`).join('')}</div>`;
+  } },
+
+  // 短剧：封面铺满，每 8 秒换一部
+  { key: 'drama', repo: 'short-drama', cover: true, load: () => Promise.all([getJSON(ORIGIN + 'short-drama/picks.json'), getJSON(ORIGIN + 'short-drama/data.json')]), render([p]) {
+    const items = p.items.filter(i => i.cover).slice(0, 6);
+    DRAMA = items;
+    const i = items[dramaIdx % (items.length || 1)];
+    if (!i) return label('本周热门短剧', 'short-drama') + '<div class="loading">暂无</div>';
+    return `<div class="bg" style="background-image:${bgUrl(ORIGIN + 'short-drama/' + i.cover)}"></div>` + label('本周热门短剧', 'short-drama') +
+      `<div class="body"><span class="chip">${esc(i.form)}</span><span class="sub">${esc((i.rank_note || '').split('；')[0])}</span>
+        <div class="tt">${esc(i.title)}</div><div class="sub ell">本周热播 ${p.items.length} 部 · ${dramaIdx % items.length + 1}/${items.length}</div></div>`;
+  } },
+
+  { key: 'macro', repo: 'earnings-calendar', load: () => getJSON(ORIGIN + 'earnings-calendar/data.json'), render(d) {
+    MACRO = d;
+    const next = d.macro.filter(m => m.time && new Date(m.time) > Date.now() && m.impact === 'High').sort((a, b) => new Date(a.time) - new Date(b.time))[0];
+    const week = new Date(d.today_et); week.setDate(week.getDate() + 7);
+    const ern = d.earnings.filter(e => e.watch && e.date >= d.today_et && e.date <= week.toISOString().slice(0, 10)).sort((a, b) => a.date.localeCompare(b.date));
+    return mini('高影响事件', 'earnings-calendar', next ? cdParts(next.time).map(([n, u]) => `${n}<small>${u}</small>`).join(' ') : '—',
+      next ? `${esc(next.title)} · ${fmtCST(next.time)}` : '近期没有高影响事件', ern.length ? '本周财报 ' + ern.slice(0, 4).map(e => esc(e.symbol)).join(' · ') : '本周关注公司没有财报');
+  } },
+
+  { key: 'save', repo: 'savings-rates', load: () => getJSON(ORIGIN + 'savings-rates/data.json'), render(d) {
+    const today = todayCN(), bond = t => d.bonds.flatMap(b => b.items).find(i => i.term === t)?.rate;
+    const live = d.bonds.find(b => b.start <= today && today <= b.end);
+    let next = d.bonds.filter(b => b.start > today).sort((a, b) => a.start.localeCompare(b.start))[0]?.start;
+    if (!next) {                                       // 没公告时按 3–11 月每月 10 日推算
+      let y = +today.slice(0, 4), m = +today.slice(5, 7) + (+today.slice(8, 10) > 10 ? 1 : 0);
+      if (m > 11 || m < 3) { if (m > 11) y++; m = 3; }
+      next = `${y}-${String(m).padStart(2, '0')}-10`;
+    }
+    return mini('大行 3 年定期', 'savings-rates', `${d.deposit.rates['3年'].toFixed(2)}<small>%</small>`,
+      `储蓄国债 ${bond(3)?.toFixed(2) ?? '—'}% / ${bond(5)?.toFixed(2) ?? '—'}%`, live ? `国债发售中 · ${esc(live.kind)}` : `下期国债 ${dayDiff(today, next)} 天后 · ${md(next)}`);
+  } },
+
+  { key: 'oil', repo: 'market-board', hash: '#oilgold', load: () => getJSON(ORIGIN + 'market-board/oilgold.json'), render(d) {
+    const o = d.oil, e = o.estimate || {}, au = d.gold?.quotes?.au9999;
+    const vc = e.verdict === '上调' ? 'up' : e.verdict === '下调' ? 'down' : 'dim';      // 国内习惯：涨红跌绿
+    return mini('油价 · 金价', 'market-board', `${o.next_window?.days ?? '—'}<small>天后调价</small>`,
+      `本轮预测 <span class="${vc}">${esc(e.verdict || '—')}</span>${e.verdict && e.verdict !== '搁浅' ? ` 约 ${Math.abs(e.est_ton)} 元/吨` : ''}`,
+      au ? `Au9999 ${au.price.toFixed(0)} 元/克 · <span class="${au.chg_pct > 0 ? 'up' : au.chg_pct < 0 ? 'down' : 'dim'}">${au.chg_pct > 0 ? '+' : ''}${au.chg_pct.toFixed(2)}%</span>` : '');
+  } },
+
+  { key: 'dca', repo: 'nasdaq-dca', load: () => getJSON(ORIGIN + 'nasdaq-dca/data.json'), render(d) {
+    const byCode = Object.fromEntries(d.funds.map(f => [f.code, f]));
+    const plan = d.plan.map(p => byCode[p.code]).filter(Boolean);
+    const open = d.funds.filter(f => f.status !== '暂停').length;
+    const planOpen = plan.filter(f => f.status !== '暂停').length;
+    return mini('纳指定投', 'nasdaq-dca', `${open}<small>/ ${d.funds.length} 只可申购</small>`,
+      `我的计划 ${planOpen} / ${plan.length} 只可买`, plan[0] ? `${esc(plan[0].name)} · ${esc(plan[0].status_raw || plan[0].status)}` : '');
+  } },
+
+  { key: 'weekly', repo: 'weekly-new', load: () => getJSON(ORIGIN + 'weekly-new/data.json'), render(d) {
+    const today = todayCN(), days = t => dayDiff(today, t);
+    const fresh = d.movies.showing.filter(m => m.release && days(m.release) <= 0 && days(m.release) > -7);
+    const pool = (fresh.length >= 3 ? fresh : d.movies.showing).filter(m => m.cover_local || m.cover);
+    const best = [...fresh].filter(m => m.rating).sort((a, b) => b.rating - a.rating)[0];
+    const posters = [...pool].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+    const tvNew = d.tv.filter(t => t.pub_precise && days(t.pubdate) <= 0 && days(t.pubdate) > -14).length;
+    const sales = d.news.concert.filter(c => c.sale && c.date && days(c.date) >= 0).length;
+    return label('本周上新', 'weekly-new') + `<div class="posters">${posters.map(m => `<i style="background-image:${bgUrl(m.cover_local ? ORIGIN + 'weekly-new/' + m.cover_local : m.cover)}"></i>`).join('')}
+      <div class="info"><div class="big">${best ? best.rating : fresh.length}${best ? '' : '<small>部</small>'}</div>
+        <div class="sub ell" style="margin-top:6px">${best ? `《${esc(best.title)}》本周新片最高分` : '本周新上映'}</div>
+        <div class="sub ell dim">新片 ${fresh.length} · 新剧综 ${tvNew} · 待开票 ${sales}</div></div></div>`;
+  } },
+
+  { key: 'weekend', repo: 'hz-weekend', cover: true, load: () => getJSON(ORIGIN + 'hz-weekend/data.json'), render(d) {
+    const [sat, sun] = d.weekend, by = Object.fromEntries((d.daily || []).map(x => [x.date, x]));
+    const rainy = x => x && (x.pop >= 60 || x.rain >= 5 || /雨|雪/.test(x.text || ''));
+    const s = by[sat], u = by[sun];
+    const verdict = !s && !u ? '预报未出' : rainy(s) && rainy(u) ? '两天有雨' : rainy(s) ? '周六有雨' : rainy(u) ? '周日有雨' : '适合出门';
+    const today = todayCN();
+    const exh = (d.exhibitions || []).filter(x => x.img && (!x.start || x.start <= sun) && (!x.end || x.end >= sat));
+    const ending = [...exh].filter(x => x.end).sort((a, b) => a.end.localeCompare(b.end))[0] || exh[0];
+    const ico = x => /雷/.test(x?.text) ? '⛈' : /雨/.test(x?.text) ? '🌧' : /雪/.test(x?.text) ? '🌨' : /阴/.test(x?.text) ? '☁️' : /云/.test(x?.text) ? '⛅' : '☀️';
+    const day = (x, n) => x ? `<div><b>${ico(x)} ${x.tmin}~${x.tmax}°</b><span>${n} · ${esc(x.text || '')} ${x.pop ?? '—'}%</span></div>` : '';
+    return (ending ? `<div class="bg" style="background-image:${bgUrl(ending.img)}"></div>` : '') + label('杭州 · 本周末', 'hz-weekend') +
+      `<div class="body wk-body"><div><div class="big" style="font-size:32px">${verdict}</div>
+        <div class="sub ell" style="margin-top:6px">${ending ? `${esc(ending.title)} · ${ending.end ? `还剩 ${Math.max(0, dayDiff(today, ending.end))} 天` : esc(ending.venue)}` : `${exh.length} 个展览在展`}</div></div>
+        <div class="days">${day(s, '周六')}${day(u, '周日')}</div></div>`;
+  } },
+
+  { key: 'game', repo: 'game-deals', cover: true, load: () => getJSON(ORIGIN + 'game-deals/data.json'), render(d) {
+    const now = (d.epic || []).filter(x => x.kind === 'now' && x.img);
+    const g = now[0] || (d.epic || []).find(x => x.img);
+    const left = t => { const h = Math.max(0, (new Date(t) - Date.now()) / 3600e3); return h >= 24 ? `${Math.floor(h / 24)} 天后结束` : `${Math.floor(h)} 小时后结束`; };
+    return (g ? `<div class="bg" style="background-image:${bgUrl(g.img)}"></div>` : '') + label('喜加一', 'game-deals') +
+      `<div class="body"><span class="chip">${g?.kind === 'now' ? 'Epic 限免' : 'Epic 下周'}</span>
+        <div class="tt">${esc(g?.title || '—')}</div><div class="sub ell">${g?.end ? left(g.end) : ''}${now.length > 1 ? ` · 另有 ${now.length - 1} 款` : ''} · Steam 史低 ${d.summary.steam_lows}</div></div>`;
+  } },
+
+  { key: 'car', repo: 'car-deals', load: () => getJSON(ORIGIN + 'car-deals/data.json'), render(d) {
+    const city = d.cuts['杭州'] ? '杭州' : Object.keys(d.cuts)[0];
+    const cut = [...(d.cuts[city]?.items || [])].sort((a, b) => b.pct - a.pct)[0];
+    const month = Object.keys(d.sales).sort().pop(), champ = d.sales[month]?.[0];
+    const week = d.launches.filter(x => x.status === 'launched' && within(x.date, 7)).length;
+    return (champ?.img ? `<img class="car-img" src="${esc(champ.img)}" alt="" onerror="this.remove()">` : '') +
+      mini('车市行情', 'car-deals', `${week}<small>款上市</small>`, champ ? `${+month.slice(4)} 月销冠 ${esc(champ.name)} ${champ.sales.toLocaleString()} 辆` : '',
+        cut ? `${esc(city)} ${esc(cut.name)} <span class="down">↓${cut.cut} 万</span>` : '');
+  } },
+
+  { key: 'apps', repo: 'appstore-tracker', load: () => getJSON(ORIGIN + 'appstore-tracker/data.json'), render(d) {
+    const me = d.apps.find(a => a.key === 'hk:1470042146') || d.apps[0];
+    const recent = d.apps.filter(a => within(a.version_date, 7)).length;
+    const seen = new Set(), icons = d.apps.filter(a => a.icon && !seen.has(a.name) && seen.add(a.name)).slice(0, 5);
+    return label('竞品 · 财经榜', 'appstore-tracker') + `<div class="big" style="font-size:36px;margin-top:auto">${me?.rank ? '#' + me.rank : '未上榜'}</div>
+      <div class="sub ell" style="margin-top:6px">${esc(me?.name || '')} · 7 天内 ${recent} 个竞品发版</div>
+      <div class="icons">${icons.map(a => `<img src="${esc(a.icon)}" alt="" title="${esc(a.name)}" onerror="this.style.visibility='hidden'">`).join('')}</div>`;
+  } },
+
+  { key: 'recall', repo: 'recall-watch', cover: true, load: () => getJSON(ORIGIN + 'recall-watch/data.json'), render(d) {
+    const since = new Date(Date.now() - 30 * 86400e3 + 8 * 3600e3).toISOString().slice(0, 10);
+    const rc = d.recalls.filter(x => x.kind === 'consumer' && x.date >= since);
+    const cats = {}; rc.forEach(x => cats[x.cat] = (cats[x.cat] || 0) + 1);
+    const top = Object.entries(cats).sort((a, b) => b[1] - a[1])[0];
+    const food = d.fails.filter(x => x.kind === 'food' && x.date >= since);
+    const pic = d.recalls.find(x => x.kind === 'consumer' && x.img) || d.recalls.find(x => x.img);   // 最新一条带产品照片的召回做封面
+    return (pic ? `<div class="bg" style="background-image:${bgUrl(pic.img)};background-color:#fff;background-size:contain"></div>` : '') + label('消费避坑 · 近 30 天', 'recall-watch') +
+      `<div class="body"><div class="big" style="font-size:34px">${rc.length}<small>起召回</small></div>
+        <div class="sub ell" style="margin-top:6px">${pic ? `${esc(pic.brand ? pic.brand + '牌' : '')}${esc(pic.product)}` : top ? `${esc(top[0])}最多` : ''}</div>
+        <div class="sub ell">食品不合格 ${food.length} 批 · 浙江 ${food.filter(x => x.src === '浙江').length} 批</div></div>`;
+  } },
+
+  { key: 'food', repo: 'food-prices', load: () => getJSON(ORIGIN + 'food-prices/data.json'), render(d) {
+    const ch = (id, days) => {
+      const s = Object.entries(d.xinfadi[id] || {}); if (!s.length) return null;
+      const [lastDay, last] = s.at(-1), cut = new Date(new Date(lastDay) - days * 86400e3).toISOString().slice(0, 10);
+      const base = [...s].reverse().find(([day]) => day <= cut)?.[1];
+      return { last, chg: base ? (last / base - 1) * 100 : null };
+    };
+    const p = v => v == null ? '—' : `${v > 0 ? '▲' : v < 0 ? '▼' : ''}${Math.abs(v).toFixed(1)}%`;
+    const pork = ch('pork_lean', 7), egg = ch('egg', 7);
+    const m = Object.keys(d.cpi).at(-1), c = d.cpi[m] || {};
+    return mini('菜价 · 物价', 'food-prices', `${pork ? pork.last.toFixed(2) : '—'}<small>元/斤 猪肉</small>`,
+      `周 <span class="${cls(pork?.chg ?? 0)}">${p(pork?.chg)}</span> · 鸡蛋 ${egg ? egg.last.toFixed(2) : '—'} <span class="${cls(egg?.chg ?? 0)}">${p(egg?.chg)}</span>`,
+      c.cpi ? `${+m.slice(5)} 月 CPI 同比 ${c.cpi.yoy > 0 ? '+' : ''}${c.cpi.yoy.toFixed(1)}%` : '新发地批发价');
+  } },
+
+  { key: 'home', repo: 'home-prices', load: () => getJSON(ORIGIN + 'home-prices/data.json'), render(d) {
+    const s = d.summary, u = s.counts.used, n = s.counts.new, t = s.tiers.used;
+    const p = v => v == null ? '—' : `${v > 100 ? '+' : ''}${(v - 100).toFixed(1)}%`;
+    return mini(`70 城房价 · ${+s.month.slice(5)} 月`, 'home-prices', `${u.down}<small>城二手下跌</small>`,
+      `二手 ${u.up} 涨 / ${u.down} 跌 · 新房 ${n.up} 涨 / ${n.down} 跌`, t['1'] ? `一线二手同比 ${p(t['1'][1])}` : '');
+  } },
+
+  { key: 'resp', repo: 'health-weekly', load: () => getJSON(ORIGIN + 'health-weekly/data.json'), render(d) {
+    const w = d.weeks[0];
+    const SHORT = { '新型冠状病毒': '新冠', '流感病毒': '流感', '呼吸道合胞病毒': '合胞病毒', '人偏肺病毒': '人偏肺', '副流感病毒': '副流感' };
+    const [name, top] = Object.entries(w.outpatient).sort((a, b) => b[1].rate - a[1].rate)[0] || [];
+    const chg = c => c == null ? '' : `<span class="${c > 0 ? 'up' : c < 0 ? 'down' : 'dim'}">${c > 0 ? '↑' : c < 0 ? '↓' : ''}${c ? Math.abs(c).toFixed(1) : '持平'}</span>`;
+    return mini(`呼吸道 · 第 ${w.week} 周`, 'health-weekly', `${esc(SHORT[name] || name || '—')}<small>${top ? top.rate + '%' : ''}</small>`,
+      `门诊头号病原体 ${chg(top?.chg)}`, `南方 ${esc((w.level?.south || '—').replace('水平', ''))} · 北方 ${esc((w.level?.north || '—').replace('水平', ''))}`);
+  } },
+
+  { key: 'rules', repo: 'new-rules', cover: true, load: () => getJSON(ORIGIN + 'new-rules/data.json'), render(d) {
+    const today = todayCN(), nm = new Date(today.slice(0, 7) + '-01T00:00:00Z'); nm.setUTCMonth(nm.getUTCMonth() + 1);
+    const next = nm.toISOString().slice(0, 7);
+    const nat = d.items.filter(i => i.date.startsWith(next) && !i.region && i.kind !== 'std');
+    const hot = [...nat].sort((a, b) => (b.articles.length + (b.kind === 'law' ? 3 : 0)) - (a.articles.length + (a.kind === 'law' ? 3 : 0)))[0];
+    const pic = nat.filter(i => i.img).sort((a, b) => b.articles.length - a.articles.length)[0];       // 报道最多、带配图的一条做封面
+    const show = pic || hot;
+    return (pic ? `<div class="bg" style="background-image:${bgUrl(pic.img)}"></div>` : '') + label('每月新规', 'new-rules') +
+      `<div class="body"><span class="chip">${nat.length} 条 · ${+next.slice(5)} 月起</span>
+        <div class="tt">${show ? esc(show.name ? `《${show.name}》` : show.title) : '—'}</div>
+        <div class="sub ell">距 ${+next.slice(5)} 月 1 日还有 ${dayDiff(today, next + '-01')} 天</div></div>`;
+  } },
+
+  { key: 'holiday', repo: 'holiday-planner', load: () => getJSON(ORIGIN + 'holiday-planner/data.json'), render(d) {
+    const s = d.summary, n = s.next, best = s.top[0];
+    return mini(`拼假 · ${s.plan_year}`, 'holiday-planner', n ? `${n.days}<small>天后 ${esc(n.name)}</small>` : '—',
+      n ? `${md(n.date)}${n.est ? '（预估）' : ''} · 还要上 ${n.workdays} 天班` : '', best ? `${esc(best.names[0])}请 ${best.used} 休 ${best.len}` : '');
+  } },
+
+  { key: 'ticket', repo: 'ticket-calendar', load: () => getJSON(ORIGIN + 'ticket-calendar/data.json'), render(d) {
+    const today = todayCN();
+    const add = (iso, n) => { const x = new Date(iso + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+    const next = (d.holidays || []).find(h => add(h.start, -15) >= today);   // 去程（前一天）车票还没开售的最近假期
+    return mini('抢票日历', 'ticket-calendar', `${md(add(today, 14))}<small>今天开售</small>`, '12306 预售期 15 天',
+      next ? `${esc(next.name)}去程票 ${dayDiff(today, add(next.start, -15))} 天后开售` : '');
+  } },
+
+  { key: 'exam', repo: 'exam-calendar', load: () => getJSON(ORIGIN + 'exam-calendar/exams.json'), render(d) {
+    const today = todayCN(), days = t => dayDiff(today, t);
+    const evs = d.exams.flatMap(x => x.sessions.flatMap(s => s.events.map(e => ({ ...e, x }))));
+    const open = evs.filter(e => ['报名', '预报名', '确认'].includes(e.type) && days(e.start) <= 0 && days(e.end || e.start) >= 0)
+      .sort((a, b) => (a.end || a.start).localeCompare(b.end || b.start));
+    const ex = evs.filter(e => e.type === '考试' && days(e.start) >= 0).sort((a, b) => a.start.localeCompare(b.start))[0];
+    return mini('考试日历', 'exam-calendar', `${open.length}<small>项正在报名</small>`,
+      open[0] ? `${esc(open[0].x.short)} ${md(open[0].end || open[0].start)} 截止` : '暂无报名中', ex ? `下一场 ${esc(ex.x.short)} · ${days(ex.start)} 天后` : '');
+  } },
+
+  { key: 'match', repo: 'match-day', load: () => getJSON(ORIGIN + 'match-day/data.json'), render(d) {
+    const bj = ts => new Date(ts * 1000 + 8 * 3600e3).toISOString();
+    const today = todayCN(), now = Date.now() / 1000;
+    const todays = d.events.filter(e => bj(e.ts).startsWith(today));
+    const pick = d.events.filter(e => e.ts > now && (e.china || e.major) && e.home !== 'TBD')[0];
+    const when = e => { const t = bj(e.ts); return `${t.slice(0, 10) === today ? '今天' : md(t)} ${t.slice(11, 16)}`; };
+    // 优先挑双方都有队徽的重点比赛，大屏上显示「队徽 vs 队徽」
+    const base = ORIGIN + 'match-day/';                // 队徽是 match-day 仓库里的相对路径
+    const logo = (e, side) => e[side + 'LogoDark'] || e[side + 'Logo'];
+    const withLogo = d.events.filter(e => e.ts > now && (e.china || e.major) && e.home !== 'TBD' && logo(e, 'home') && logo(e, 'away'))[0] || pick;
+    const vs = withLogo && logo(withLogo, 'home') && logo(withLogo, 'away') ? `<div class="vs">
+        <img src="${esc(base + logo(withLogo, 'home'))}" alt="" onerror="this.style.visibility='hidden'"><span>${when(withLogo).split(' ')[1]}</span>
+        <img src="${esc(base + logo(withLogo, 'away'))}" alt="" onerror="this.style.visibility='hidden'"></div>` : '';
+    if (!vs) return mini('赛程', 'match-day', `${todays.length}<small>场今天</small>`,
+      pick ? `${esc(pick.sport === 'esports' ? pick.game : pick.league)} · ${esc(pick.home && pick.away ? `${pick.home} vs ${pick.away}` : pick.stage || '')}` : '暂无重点比赛',
+      pick ? when(pick) + (pick.china ? ' · 中国' : '') : '');
+    const e = withLogo;
+    return label(`赛程 · 今天 ${todays.length} 场`, 'match-day') + vs +
+      `<div class="sub l1 ell">${esc(e.home)} vs ${esc(e.away)}</div><div class="sub l2 ell">${esc(e.sport === 'esports' ? e.game : e.league)} · ${when(e).split(' ')[0]}${e.china ? ' · 中国' : ''}</div>`;
+  } },
+
+  { key: 'tech', repo: 'tech-news', cover: true, load: () => getJSON(`${SUPABASE_URL}/rest/v1/news_items?select=title,source,date,image_url&order=date.desc,created_at.desc&limit=60`,
+      { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }), render(rows) {
+    const today = todayCN(), n = rows.filter(r => r.date === today).length;
+    const top = rows.find(r => r.image_url) || rows[0];
+    return (top?.image_url ? `<div class="bg" style="background-image:${bgUrl(top.image_url)}"></div>` : '') + label('科技动态', 'tech-news') +
+      `<div class="body"><span class="chip">今天 ${n} 条</span><div class="tt">${esc(top?.title || '—')}</div><div class="sub ell">${esc(top?.source || '')} · ${top ? md(top.date) : ''}</div></div>`;
+  } },
+
+  { key: 'ios', repo: 'ios-dev-news', load: () => getJSON(ORIGIN + 'ios-dev-news/data.json'), render(d) {
+    const rel = d.items.filter(i => i.kind === 'release');
+    const latest = (p, stable) => rel.filter(i => i.platform === p && (stable ? i.stage === '正式版' : true)).sort((a, b) => b.date.localeCompare(a.date))[0];
+    const xs = latest('Xcode', true), xb = latest('Xcode'), is = latest('iOS', true);
+    const n7 = d.items.filter(i => within(i.date, 7)).length;
+    return mini('iOS 开发动态', 'ios-dev-news', `${esc(xs?.version || '—')}<small>Xcode</small>`,
+      xb && xb !== xs ? `${esc(xb.version)} ${esc(xb.stage)} 进行中` : `iOS ${esc(is?.version || '—')}`, `近 7 天 ${n7} 条动态`);
+  } },
+];
+
+// 格子顺序（auto-flow 依次填入 7×5）
+const LAYOUT = ['fx', 'hot', 'drama', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
+  'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
+let MACRO = null, DRAMA = [], dramaIdx = 0;
+const byKey = Object.fromEntries(CARDS.map(c => [c.key, c]));
+const cache = {};
+
+function shell() {
+  $('#bento').innerHTML = LAYOUT.map(k => {
+    if (k === 'tools') return `<div class="card k-tools" id="k-tools"></div>`;
+    const c = byKey[k];
+    return `<a class="card k-${k} ${c.cover ? 'cover' : ''} ${(['fx', 'hot', 'weekly', 'apps'].includes(k) || c.cover) ? '' : 'mini'}" id="k-${k}" href="${siteUrl(c.repo)}${c.hash || ''}" target="_blank" rel="noopener">
+      ${label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo)}<div class="loading">加载中…</div></a>`;
   }).join('');
-  $('#health').innerHTML = `<div class="label">站点健康<span class="r">检查于 ${ago(HEALTH.updated)}</span></div>
-    <div class="h-head"><span class="big">${ok}<span style="color:var(--text-3)"> / ${rs.length}</span></span><span class="sub">个站点运行正常</span></div>
-    <div class="chips"><span class="chip" style="--c:var(--ok)">正常 ${ok}</span><span class="chip" style="--c:var(--warn)">注意 ${n('warn')}</span><span class="chip" style="--c:var(--err)">异常 ${n('error')}</span>
-      <span class="chip" style="--c:transparent;margin-left:auto">右侧 = 距 60 天停用剩余</span></div>
-    <div class="sites">${sites}</div>`;
+}
+function renderCard(k) {
+  const c = byKey[k], el = document.getElementById('k-' + k);
+  if (!el || !(k in cache)) return;
+  const x = cache[k];
+  if (x.error) { el.innerHTML = label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo) + `<div class="loading">读取失败（${esc(x.error)}）</div>`; return; }
+  try { el.innerHTML = c.render(x.data, el); }
+  catch (e) { console.warn('[Screen]', k, e); el.innerHTML = label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo) + '<div class="loading">数据格式已变化</div>'; }
+}
+// 工具格：清单里的工具页 + 还没有专属卡片的新站点（自动出现，不用改布局）
+function renderTools() {
+  const known = new Set(CARDS.map(c => c.repo));
+  const list = SITES.filter(s => s.kind === 'tool' || (s.kind === 'data' && !known.has(s.repo)));
+  $('#k-tools').innerHTML = `<div class="label"><span class="t">工具 · 其他站点</span><span class="go">${list.length} 个</span></div>
+    <div class="tools">${list.map(s => `<a href="${siteUrl(s.repo)}" target="_blank" rel="noopener">${esc(s.name)}<span>${esc(s.desc || (s.kind === 'data' ? '新站点' : s.repo))} ↗</span></a>`).join('')}</div>`;
+}
+function renderHealth() {
+  const rs = HEALTH?.repos || [];
+  const items = SITES.map(s => ({ s, h: rs.find(r => r.name === s.repo) }));
+  const checked = items.filter(x => x.h), bad = checked.filter(x => x.h.level === 'error'), warn = checked.filter(x => x.h.level === 'warn');
+  $('#hpText').innerHTML = HEALTH ? `<b>${checked.length - bad.length - warn.length}</b> / ${SITES.length} 正常` +
+    (warn.length ? ` · <span style="color:var(--warn)">${warn.length} 注意</span>` : '') + (bad.length ? ` · <span style="color:var(--err)">${bad.length} 异常</span>` : '') +
+    (checked.length < SITES.length ? ` · <span class="dim">${SITES.length - checked.length} 待检查</span>` : '') : '健康检查读取失败';
+  $('#dots').innerHTML = items.map(({ s, h }) => `<a class="${h?.level || ''}" href="${esc(h?.repo_url ? h.repo_url + '/actions' : siteUrl(s.repo))}" target="_blank" rel="noopener"
+    data-t="${esc(s.name)} · ${h ? (h.level === 'ok' ? '正常' : esc(h.issues?.[0]?.text || h.level)) : '尚未纳入健康检查'}"></a>`).join('');
+  $('#hp').title = HEALTH ? `健康检查于 ${ago(HEALTH.updated)}` : '';
 }
 
-// ── 加载 ──
-const SOURCES = [
-  [() => getJSON(ORIGIN + 'fx-board/data.json'), renderFx, '#fx'],
-  [() => getJSON(ORIGIN + 'oil-gold/data.json'), renderOil, '#oil'],
-  [() => getJSON(ORIGIN + 'savings-rates/data.json'), renderSave, '#save'],
-  [() => getJSON(ORIGIN + 'health-weekly/data.json'), renderResp, '#resp'],
-  [() => getJSON(ORIGIN + 'hot-news/data.json'), renderHot, '#hot'],
-  [() => getJSON(ORIGIN + 'earnings-calendar/data.json'), renderMacro, '#macro'],
-  [() => getJSON(ORIGIN + 'appstore-tracker/data.json'), renderApps, '#apps'],
-  [() => Promise.all([getJSON(ORIGIN + 'short-drama/picks.json'), getJSON(ORIGIN + 'short-drama/data.json')]), renderDrama, '#drama'],
-  [() => getJSON(ORIGIN + 'holiday-planner/data.json'), renderHoliday, '#holiday'],
-];
 let nextAt = Date.now() + REFRESH_MS;
 async function load() {
   nextAt = Date.now() + REFRESH_MS;
-  await Promise.allSettled([
-    getJSON('health.json').then(h => { HEALTH = h; renderHealth(); }).catch(() => {}),
-    ...SOURCES.map(([fetcher, render, el]) => fetcher().then(d => {
-      try { render(d); } catch (e) { console.warn('[Screen]', render.name, e); if (el) $(el).insertAdjacentHTML('beforeend', '<div class="loading">数据格式已变化</div>'); }
-    }).catch(e => { const box = el && $(el), ld = box?.querySelector('.loading'); if (ld) ld.textContent = `读取失败（${e.message}）`; })),
-  ]);
+  const h = getJSON('health.json').then(x => { HEALTH = x; }).catch(() => {});
+  await Promise.allSettled(CARDS.map(c => c.load().then(data => { cache[c.key] = { data }; }).catch(e => { cache[c.key] = { error: e.message }; })
+    .finally(() => renderCard(c.key))));
+  await h;
+  renderHealth();
+  LAYOUT.forEach(k => k !== 'tools' && renderCard(k));          // 拿到健康数据后刷新卡片标题前的状态点
 }
 
 // ── 画布缩放、时钟、全屏 ──
@@ -481,8 +569,7 @@ function tick() {
   const now = new Date();
   $('#clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' });
   $('#date').textContent = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
-  const left = Math.max(0, nextAt - Date.now()) / 1000;
-  $('#metaLine').textContent = `${Math.ceil(left / 60)} 分钟后刷新`;
+  $('#metaLine').textContent = `${Math.ceil(Math.max(0, nextAt - Date.now()) / 60000)} 分钟后刷新`;
 }
 function toggleFs() {
   if (document.fullscreenElement) document.exitFullscreen?.();
@@ -492,10 +579,13 @@ $('#fs').addEventListener('click', toggleFs);
 document.addEventListener('keydown', e => { if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey) toggleFs(); });
 addEventListener('resize', fit);
 
+shell();
+renderTools();
 fit();
 tick();
 setInterval(tick, 1000);
-setInterval(() => { if (MACRO) renderMacro(MACRO); if (HEALTH) renderHealth(); }, 60 * 1000);   // 倒计时、相对时间每分钟更新
+setInterval(() => { if (MACRO) renderCard('macro'); }, 60 * 1000);                                // 倒计时每分钟更新
+setInterval(() => { if (DRAMA.length > 1) { dramaIdx = (dramaIdx + 1) % DRAMA.length; renderCard('drama'); } }, 8000);   // 短剧封面轮播
 load();
 setInterval(load, REFRESH_MS);
 </script>
