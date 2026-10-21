@@ -438,6 +438,29 @@ const SITES = [
           <div class="row"><span class="l">${s.plan_year} 放假安排</span><span class="r">${s.plan_official ? '已公布' : '未公布，按预估计算'}</span></div></div>`;
     },
   },
+  {
+    repo: 'weekly-new', title: '🍿 本周上新', color: '#f472b6',
+    load: () => getJSON(ORIGIN + 'weekly-new/data.json'),
+    render(d) {
+      const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const days = t => Math.round((new Date(t) - new Date(today)) / 86400e3);
+      const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+      const fresh = d.movies.showing.filter(m => m.release && days(m.release) <= 0 && days(m.release) > -7);
+      const best = [...fresh].filter(m => m.rating).sort((a, b) => b.rating - a.rating)[0];
+      const tvNew = d.tv.filter(t => t.pub_precise && days(t.pubdate) <= 0 && days(t.pubdate) > -14);
+      const launch = [...(d.manual || []), ...d.news.launch].filter(e => e.date && days(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date))[0];
+      const sales = d.news.concert.filter(c => c.sale && c.date && days(c.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
+      const when = t => { const n = days(t); return n === 0 ? '今天' : n === 1 ? '明天' : `${n} 天后`; };
+      return `<div class="stats">
+          <div class="stat"><div class="k">本周新上映</div><div class="v num">${fresh.length} 部</div><div class="s muted">${best ? `最高 ★${best.rating} ${esc(best.title)}` : '新片暂无评分'}</div></div>
+          <div class="stat"><div class="k">新开播剧综</div><div class="v num">${tvNew.length} 部</div><div class="s muted">近 14 天</div></div>
+          <div class="stat"><div class="k">下一场发布会</div><div class="v num">${launch ? when(launch.date) : '—'}</div><div class="s muted">${launch ? `${esc(launch.brand)} · ${md(launch.date)}` : ''}</div></div>
+        </div>
+        <div class="rows">${fresh.slice(0, 2).map(m => `<a class="row" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="l">🎬 ${esc(m.title)}</span><span class="r">${md(m.release)} 上映${m.rating ? ` · ★${m.rating}` : ''}</span></a>`).join('')}
+          ${tvNew.sort((a, b) => b.pubdate.localeCompare(a.pubdate)).slice(0, 2).map(t => `<a class="row" href="${esc(t.url)}" target="_blank" rel="noopener"><span class="l">📺 ${esc(t.title)}</span><span class="r">${md(t.pubdate)} 开播${t.platforms?.[0] ? ' · ' + esc(t.platforms[0]) : ''}</span></a>`).join('')}
+          ${sales.slice(0, 2).map(c => `<a class="row" href="${esc(c.articles[0]?.url)}" target="_blank" rel="noopener"><span class="l">🎤 ${esc(c.title)}</span><span class="r">${when(c.date)}开票</span></a>`).join('')}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
