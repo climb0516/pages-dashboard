@@ -62,9 +62,10 @@
     .card > * { flex-shrink: 0; }   /* 内容不被 flex 压扁裁字，只有图表 / 列表区可伸缩 */
     .card > .spark, .card > .rows, .card > .sites, .card > .drama { flex-shrink: 1; }
     .c-fx { grid-column: 1 / 6; grid-row: 1 / 3; }
-    .c-hot { grid-column: 1 / 4; grid-row: 3 / 5; }
-    .c-dca { grid-column: 4 / 6; grid-row: 3; }
-    .c-tech { grid-column: 4 / 6; grid-row: 4; }
+    .c-hot { grid-column: 1 / 4; grid-row: 3; }
+    .c-oil { grid-column: 1 / 4; grid-row: 4; }
+    .c-save { grid-column: 4 / 6; grid-row: 3; }
+    .c-resp { grid-column: 4 / 6; grid-row: 4; }
     .c-health { grid-column: 6 / 10; grid-row: 1 / 4; }
     .c-holiday { grid-column: 6 / 10; grid-row: 4; }
     .c-macro { grid-column: 10 / 13; grid-row: 1; }
@@ -170,10 +171,15 @@
     .senti { padding-top: 10px; border-top: 1px solid var(--hair); }
     .senti .k { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-3); margin-bottom: 8px; }
 
-    .tech-rel { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-    .tech-rel span { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: var(--card-2); color: var(--text-2); white-space: nowrap; }
-    .tech-rel span b { color: var(--text-1); font-weight: 500; }
-    .c-tech .row { height: 34px; font-size: 13.5px; }
+    .c-hot .row { height: 36px; font-size: 14px; }
+    /* 小卡片：一个主数字 + 两行要点 */
+    .mini-big { font-size: 46px; }
+    .mini-big small { font-size: 18px; font-weight: 500; color: var(--text-2); margin-left: 4px; letter-spacing: -0.01em; }
+    .mini-lines { margin-top: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); }
+    .mini-lines b { color: var(--text-1); font-weight: 500; }
+    .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; min-height: 0; }
+    .duo > div { display: flex; flex-direction: column; min-width: 0; }
+    .duo > div + div { border-left: 1px solid var(--hair); padding-left: 20px; }
 
     /* 手机：不缩放，单列 */
     @media (max-width: 760px) {
@@ -209,8 +215,9 @@
   <div class="bento">
     <section class="card c-fx" id="fx"><div class="label">汇率</div><div class="loading">加载中…</div></section>
     <section class="card c-hot"><div class="label">全网热榜<a class="go" href="https://climb0516.github.io/hot-news/" target="_blank" rel="noopener">hot-news ↗</a></div><div class="rows" id="hot"><div class="loading">加载中…</div></div></section>
-    <section class="card c-dca" id="dca"><div class="label">纳指定投</div><div class="loading">加载中…</div></section>
-    <section class="card c-tech"><div class="label">技术动态<span class="r">iOS · 科技</span></div><div class="tech-rel" id="iosRel"></div><div class="rows" id="tech"></div></section>
+    <section class="card c-oil" id="oil"><div class="label">油价 · 金价</div><div class="loading">加载中…</div></section>
+    <section class="card c-save" id="save"><div class="label">存款利率</div><div class="loading">加载中…</div></section>
+    <section class="card c-resp" id="resp"><div class="label">呼吸道</div><div class="loading">加载中…</div></section>
     <section class="card c-health" id="health"><div class="label">站点健康</div><div class="loading">加载中…</div></section>
     <section class="card c-holiday" id="holiday"><div class="label">拼假</div><div class="loading">加载中…</div></section>
     <section class="card c-macro" id="macro"><div class="label">下一个高影响事件</div><div class="loading">加载中…</div></section>
@@ -224,8 +231,6 @@
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ORIGIN = 'https://climb0516.github.io/';
-const SUPABASE_URL = 'https://sqrzrvstlvxqxdxvhlxz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxcnpydnN0bHZ4cXhkeHZobHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTUzMjAsImV4cCI6MjA5NjU5MTMyMH0.C6Gz61TB3GhLnbDWywogGZDcqTu1G2ta9-Dyo60Yiho';   // tech-news 页面公开的 anon 只读 key
 const REFRESH_MS = 10 * 60 * 1000;
 const LV = { ok: 'var(--ok)', warn: 'var(--warn)', error: 'var(--err)' };
 
@@ -287,25 +292,58 @@ function renderFx(d) {
     </div>`;
 }
 
-// ── 纳指定投 ──
-function renderDca(d) {
-  const byCode = Object.fromEntries(d.funds.map(f => [f.code, f]));
-  const st = f => f.status === '暂停' ? 'pause' : /限/.test(f.status_raw || f.status) ? 'limit' : 'open';
-  const cnt = { open: 0, limit: 0, pause: 0 };
-  d.funds.forEach(f => cnt[st(f)]++);
-  const plan = d.plan.map(p => byCode[p.code]).filter(Boolean);
-  const pc = { open: 0, limit: 0, pause: 0 };
-  plan.forEach(f => pc[st(f)]++);
-  $('#dca').innerHTML = label('纳指基金可申购', 'nasdaq-dca') + `
-    <div style="display:flex;align-items:flex-end;gap:10px"><span class="big" style="font-size:52px">${cnt.open + cnt.limit}</span><span class="sub" style="padding-bottom:4px">/ ${d.funds.length} 只</span></div>
-    <div class="seg"><i style="flex:${cnt.open || 0.0001};background:var(--ok)"></i><i style="flex:${cnt.limit || 0.0001};background:var(--warn)"></i><i style="flex:${cnt.pause || 0.0001};background:var(--err)"></i></div>
-    <div class="legend"><span style="--c:var(--ok)">正常 ${cnt.open}</span><span style="--c:var(--warn)">限大额 ${cnt.limit}</span><span style="--c:var(--err)">暂停 ${cnt.pause}</span></div>
-    <div class="dim" style="font-size:12.5px;margin-top:auto">我的计划 ${plan.length} 只 · ${pc.open + pc.limit} 只可投${pc.pause ? ` · ${pc.pause} 只暂停` : ''}</div>`;
+// ── 存款利率 ──
+function renderSave(d) {
+  const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+  const bond = t => d.bonds.flatMap(b => b.items).find(i => i.term === t)?.rate;
+  const live = d.bonds.find(b => b.start <= today && today <= b.end);
+  // 下期国债：已有公告用公告日期，否则按 3–11 月每月 10 日推算
+  let next = d.bonds.filter(b => b.start > today).sort((a, b) => a.start.localeCompare(b.start))[0]?.start;
+  if (!next) {
+    let y = +today.slice(0, 4), m = +today.slice(5, 7) + (+today.slice(8, 10) > 10 ? 1 : 0);
+    if (m > 11 || m < 3) { if (m > 11) y++; m = 3; }
+    next = `${y}-${String(m).padStart(2, '0')}-10`;
+  }
+  const days = Math.round((new Date(next) - new Date(today)) / 86400000);
+  $('#save').innerHTML = label('大行 3 年定期', 'savings-rates') + `
+    <div class="big mini-big">${d.deposit.rates['3年'].toFixed(2)}<small>%</small></div>
+    <div class="mini-lines"><span>储蓄国债 <b>${bond(3)?.toFixed(2) ?? '—'}% / ${bond(5)?.toFixed(2) ?? '—'}%</b></span>
+      <span>下期国债 <b>${live ? '发售中' : days + ' 天后'}</b>${live ? '' : ` · ${+next.slice(5, 7)}月${+next.slice(8, 10)}日`}</span></div>`;
+}
+
+// ── 呼吸道 ──
+function renderResp(d) {
+  const w = d.weeks[0];
+  const SHORT = { '新型冠状病毒': '新冠', '流感病毒': '流感', '呼吸道合胞病毒': '合胞病毒', '人偏肺病毒': '人偏肺', '副流感病毒': '副流感' };
+  const [name, top] = Object.entries(w.outpatient).sort((a, b) => b[1].rate - a[1].rate)[0] || [];
+  const chg = c => c == null ? '' : `<span class="${c > 0 ? 'up' : c < 0 ? 'down' : 'dim'}">${c > 0 ? '↑' : c < 0 ? '↓' : ''}${c ? Math.abs(c).toFixed(1) : '持平'}</span>`;
+  const cv = w.outpatient['新型冠状病毒'];
+  $('#resp').innerHTML = label(`呼吸道 · 第 ${w.week} 周`, 'health-weekly') + `
+    <div class="big mini-big">${esc(SHORT[name] || name || '—')}<small>${top ? top.rate + '%' : ''} ${chg(top?.chg)}</small></div>
+    <div class="mini-lines"><span>南方 <b>${esc((w.level?.south || '—').replace('水平', ''))}</b> · 北方 <b>${esc((w.level?.north || '—').replace('水平', ''))}</b></span>
+      <span>新冠 <b>${cv?.rate ?? '—'}%</b> ${chg(cv?.chg)}</span></div>`;
+}
+
+// ── 油价金价（国内习惯：涨红跌绿）──
+function renderOil(d) {
+  const o = d.oil, e = o.estimate || {}, au = d.gold?.quotes?.au9999;
+  const vc = e.verdict === '上调' ? 'up' : e.verdict === '下调' ? 'down' : 'dim';
+  const brand = (d.gold?.brands || []).find(b => !/批发/.test(b.name));
+  $('#oil').innerHTML = label('油价 · 金价', 'oil-gold') + `<div class="duo">
+    <div><span class="sub" style="font-size:12.5px">下次油价调整</span>
+      <div class="big mini-big">${o.next_window?.days ?? '—'}<small>天</small></div>
+      <div class="mini-lines"><span>本轮预测 <b class="${vc}">${esc(e.verdict || '—')}</b>${e.verdict && e.verdict !== '搁浅' ? ` 约 ${Math.abs(e.est_ton)} 元/吨` : ''}</span>
+        <span>92# 全国均价 <b>${o.national?.v92 ?? '—'}</b> 元/升</span></div></div>
+    <div><span class="sub" style="font-size:12.5px">上金所 Au9999</span>
+      <div class="big mini-big">${au ? au.price.toFixed(0) : '—'}<small>元/克</small></div>
+      <div class="mini-lines"><span>今日 <b class="${au?.chg_pct > 0 ? 'up' : au?.chg_pct < 0 ? 'down' : 'dim'}">${au ? (au.chg_pct > 0 ? '+' : '') + au.chg_pct.toFixed(2) + '%' : '—'}</b></span>
+        <span>${brand ? `首饰 <b>${brand.gold}</b> · 溢价 ${Math.round(brand.premium)}%` : ''}</span></div></div>
+  </div>`;
 }
 
 // ── 热榜 ──
 function renderHot(d) {
-  $('#hot').innerHTML = d.events.slice(0, 8).map((e, i) => `<a class="row" href="${esc(e.platforms[0]?.url)}" target="_blank" rel="noopener">
+  $('#hot').innerHTML = d.events.slice(0, 4).map((e, i) => `<a class="row" href="${esc(e.platforms[0]?.url)}" target="_blank" rel="noopener">
     <span class="rk ${i < 3 ? 'top' : ''}">${i + 1}</span><span class="ell">${esc(e.title)}</span><span class="r">${e.platforms.length} 个平台</span></a>`).join('');
 }
 
@@ -368,21 +406,6 @@ function renderDrama([p, d]) {
   }, 8000);
 }
 
-// ── 技术动态 ──
-function renderIos(d) {
-  const rel = d.items.filter(i => i.kind === 'release').sort((a, b) => b.date.localeCompare(a.date));
-  const chips = [];
-  ['Xcode', 'iOS'].forEach(p => {
-    const latest = rel.find(i => i.platform === p), stable = rel.find(i => i.platform === p && i.stage === '正式版');
-    if (stable) chips.push(`<span>${p} <b>${esc(stable.version)}</b></span>`);
-    if (latest && latest !== stable) chips.push(`<span>${p} <b>${esc(latest.version)} ${esc(latest.stage)}</b></span>`);
-  });
-  $('#iosRel').innerHTML = chips.join('');
-}
-function renderTech(rows) {
-  $('#tech').innerHTML = rows.slice(0, 3).map(r => `<a class="row" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="ell">${esc(r.title)}</span><span class="r">${esc(r.source)}</span></a>`).join('');
-}
-
 // ── 拼假 ──
 function renderHoliday(d) {
   const s = d.summary, n = s.next, md = t => `${+t.slice(5, 7)}/${+t.slice(8)}`;
@@ -427,15 +450,14 @@ function renderHealth() {
 // ── 加载 ──
 const SOURCES = [
   [() => getJSON(ORIGIN + 'fx-board/data.json'), renderFx, '#fx'],
-  [() => getJSON(ORIGIN + 'nasdaq-dca/data.json'), renderDca, '#dca'],
+  [() => getJSON(ORIGIN + 'oil-gold/data.json'), renderOil, '#oil'],
+  [() => getJSON(ORIGIN + 'savings-rates/data.json'), renderSave, '#save'],
+  [() => getJSON(ORIGIN + 'health-weekly/data.json'), renderResp, '#resp'],
   [() => getJSON(ORIGIN + 'hot-news/data.json'), renderHot, '#hot'],
   [() => getJSON(ORIGIN + 'earnings-calendar/data.json'), renderMacro, '#macro'],
   [() => getJSON(ORIGIN + 'appstore-tracker/data.json'), renderApps, '#apps'],
   [() => Promise.all([getJSON(ORIGIN + 'short-drama/picks.json'), getJSON(ORIGIN + 'short-drama/data.json')]), renderDrama, '#drama'],
-  [() => getJSON(ORIGIN + 'ios-dev-news/data.json'), renderIos, null],
   [() => getJSON(ORIGIN + 'holiday-planner/data.json'), renderHoliday, '#holiday'],
-  [() => getJSON(`${SUPABASE_URL}/rest/v1/news_items?select=title,source,url&order=date.desc,created_at.desc&limit=6`,
-      { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }), renderTech, '#tech'],
 ];
 let nextAt = Date.now() + REFRESH_MS;
 async function load() {
