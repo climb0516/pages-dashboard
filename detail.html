@@ -374,6 +374,55 @@ const SITES = [
           <div class="bar"><i style="width:${c.positive / t * 100}%;background:var(--ok)"></i><i style="width:${c.neutral / t * 100}%;background:var(--text-3)"></i><i style="width:${c.negative / t * 100}%;background:var(--err)"></i></div></div>`;
     },
   },
+  {
+    repo: 'savings-rates', title: '🏦 存款利率与国债', color: '#f5b94a',
+    load: () => getJSON(ORIGIN + 'savings-rates/data.json'),
+    render(d) {
+      const dep = d.deposit, cd = d.cd?.rates || {}, today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+      const bond = t => d.bonds.flatMap(b => b.items).find(i => i.term === t)?.rate;
+      const live = d.bonds.find(b => b.start <= today && today <= b.end);
+      // 下期国债：已有公告用公告日期，否则按 3–11 月每月 10 日推算
+      let next = d.bonds.filter(b => b.start > today).sort((a, b) => a.start.localeCompare(b.start))[0]?.start;
+      if (!next) {
+        let y = +today.slice(0, 4), m = +today.slice(5, 7) + (+today.slice(8, 10) > 10 ? 1 : 0);
+        if (m > 11 || m < 3) { if (m > 11) y++; m = 3; }
+        next = `${y}-${String(m).padStart(2, '0')}-10`;
+      }
+      const days = Math.round((new Date(next) - new Date(today)) / 86400000);
+      const stable = Math.round((new Date(today) - new Date(dep.date)) / 86400000);
+      return `<div class="stats">
+          <div class="stat"><div class="k">大行 3 年定期</div><div class="v">${dep.rates['3年'].toFixed(2)}%</div><div class="s muted">已 ${stable} 天未调</div></div>
+          <div class="stat"><div class="k">储蓄国债 3 / 5 年</div><div class="v">${bond(3)?.toFixed(2) ?? '—'}%</div><div class="s muted">5 年 ${bond(5)?.toFixed(2) ?? '—'}%</div></div>
+          <div class="stat"><div class="k">下期国债</div><div class="v">${live ? '发售中' : days + ' 天后'}</div><div class="s muted">${live ? live.kind : `${+next.slice(5, 7)}月${+next.slice(8, 10)}日（预计）`}</div></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="l">大额存单 3 年（中行常规，20 万起）</span><span class="r">${cd['3年']?.toFixed(2) ?? '—'}%</span></div>
+          <div class="row"><span class="l">10 万存 3 年：国债比大行定期多拿</span><span class="r">${bond(3) ? '¥' + Math.round(100000 * (bond(3) - dep.rates['3年']) / 100 * 3).toLocaleString() : '—'}</span></div>
+          <div class="row"><span class="l">LPR 1 年 / 5 年</span><span class="r">${d.lpr?.[0] ? `${d.lpr[0]['1Y'].toFixed(2)}% / ${d.lpr[0]['5Y'].toFixed(2)}%` : '—'}</span></div>
+        </div>`;
+    },
+  },
+  {
+    repo: 'oil-gold', title: '⛽ 油价金价', color: '#f59e0b',
+    load: () => getJSON(ORIGIN + 'oil-gold/data.json'),
+    render(d) {
+      // 国内习惯：涨红跌绿
+      const o = d.oil, g = d.gold, e = o.estimate || {}, au = g.quotes?.au9999;
+      const vc = e.verdict === '上调' ? 'var(--up)' : e.verdict === '下调' ? 'var(--down)' : 'var(--text-3)';
+      const brand = (g.brands || []).find(b => !/批发/.test(b.name));
+      const bank = (g.banks || [])[0];
+      return `<div class="stats">
+          <div class="stat"><div class="k">下次油价调整</div><div class="v">${o.next_window?.days ?? '—'} 天后</div><div class="s muted">${o.next_window ? `${+o.next_window.date.slice(5, 7)}月${+o.next_window.date.slice(8, 10)}日 24 时` : ''}</div></div>
+          <div class="stat"><div class="k">本轮预测</div><div class="v" style="color:${vc}">${esc(e.verdict || '—')}</div><div class="s muted">${e.verdict && e.verdict !== '搁浅' ? `约 ${Math.abs(e.est_ton)} 元/吨 · ${Math.abs(e.est_liter92 ?? e.per_liter ?? 0).toFixed(2)} 元/升` : '变动不足 50 元/吨'}</div></div>
+          <div class="stat"><div class="k">上金所 Au9999</div><div class="v">${au ? '¥' + au.price.toFixed(0) : '—'}</div><div class="s" style="color:${au?.chg_pct > 0 ? 'var(--up)' : au?.chg_pct < 0 ? 'var(--down)' : 'var(--text-3)'}">${au ? (au.chg_pct > 0 ? '+' : '') + au.chg_pct.toFixed(2) + '% · 元/克' : ''}</div></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="l">全国均价 92# / 95# / 0# 柴油</span><span class="r">${o.national ? `${o.national.v92} / ${o.national.v95} / ${o.national.v0} 元/升` : '—'}</span></div>
+          ${brand ? `<div class="row"><span class="l">品牌首饰金价（${esc(brand.name)}等）</span><span class="r">¥${brand.gold}/克 · 比大盘贵 ${brand.premium}%</span></div>` : ''}
+          ${bank ? `<div class="row"><span class="l">最便宜银行金条（${esc(bank.name)}）</span><span class="r">¥${bank.price}/克 · 溢价 ${bank.premium}%</span></div>` : ''}
+        </div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──
