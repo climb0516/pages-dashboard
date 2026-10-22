@@ -29,7 +29,7 @@ window.PAGES_SITES = [
   { repo: 'game-deals', name: 'PS 港服 · 喜加一', group: '出行娱乐', kind: 'data' },
   { repo: 'car-deals', name: '车市行情', group: '出行娱乐', kind: 'data' },
   // 工具
-  { repo: 'img2doc', name: '图片转文档', group: '工具', kind: 'tool', desc: '图片转 Word / Markdown' },
-  { repo: 'poker-score', name: '德扑计分器', group: '工具', kind: 'tool', desc: '牌局记账与结算' },
-  { repo: 'Climb0516.github.io', name: "Climb's Zone", group: '工具', kind: 'tool', desc: '个人主页', url: 'https://climb0516.github.io/' },
+  { repo: 'img2doc', name: '图片转文档', group: '工具', kind: 'tool', desc: '图片转 Word / Markdown', icon: '🖼' },
+  { repo: 'poker-score', name: '德扑计分器', group: '工具', kind: 'tool', desc: '牌局记账与结算', icon: '🃏' },
+  { repo: 'Climb0516.github.io', name: "Climb's Zone", group: '工具', kind: 'tool', desc: '个人主页', icon: '🧗', url: 'https://climb0516.github.io/' },
 ];

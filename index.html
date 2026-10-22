@@ -97,6 +97,8 @@
     .cover .body { position: relative; z-index: 2; margin-top: auto; padding: 0 18px 16px; }
     .cover .tt { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .cover .sub { color: rgba(255,255,255,.72); margin-top: 4px; }
+    .rl-ic { position: absolute; right: 16px; top: 36px; font-size: 58px; filter: drop-shadow(0 6px 16px rgba(0,0,0,.35)); }
+    .rc-pic { position: absolute; right: 16px; top: 50%; transform: translateY(-36%); width: 74px; height: 74px; border-radius: 14px; background: #fff center / contain no-repeat; box-shadow: 0 0 0 1px var(--line); }
     .chip { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 5px; background: rgba(139,156,255,.22); color: #c9d0ff; margin: 0 6px 6px 0; }
 
     /* 位置 */
@@ -120,7 +122,8 @@
     .mv.down { background: linear-gradient(180deg, rgba(34,192,138,.16), var(--card-2) 75%); }
     .mv-logo { position: relative; width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center;
       background: hsl(var(--h) 42% 46%); color: #fff; font-weight: 700; font-size: 17px; }
-    .mv-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+    .mv-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; opacity: 0; }
+    .mv-logo img.ok { opacity: 1; }                        /* 图真正加载出来才盖住首字母色块 */
     .mv-n { font-size: 12px; color: var(--text-2); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mv-p { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .fx-line { display: flex; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; }
@@ -169,8 +172,11 @@
     .icons { display: flex; gap: 7px; margin-top: 10px; }
     .icons img { width: 32px; height: 32px; border-radius: 8px; background: var(--card-2); }
     /* 工具 */
-    .tools { display: flex; gap: 10px; margin-top: auto; }
-    .tools a { flex: 1; min-width: 0; background: var(--card-2); border-radius: 12px; padding: 10px 14px; font-size: 15px; font-weight: 600; transition: color .15s; }
+    .tools { display: flex; gap: 10px; flex: 1; margin-top: 10px; min-height: 0; }        /* 三个入口铺满卡片，不留大片空白 */
+    .tools a { flex: 1; min-width: 0; background: var(--card-2); border-radius: 14px; padding: 14px 16px; font-size: 16px; font-weight: 700; transition: color .15s, transform .15s;
+      display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+    .tools a:hover { transform: translateY(-2px); }
+    .tools a i { position: absolute; right: 12px; top: 8px; font-size: 40px; font-style: normal; opacity: .85; }
     .tools a span { display: block; font-size: 12px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
     .tools a:hover { color: var(--accent); }
 
@@ -251,6 +257,10 @@ function label(title, repo) {
 const mini = (title, repo, big, l1, l2) => label(title, repo) + `<div class="big">${big}</div><div class="sub l1 ell">${l1}</div><div class="sub l2 ell">${l2}</div>`;
 
 // ── 各站卡片：key 对应格子，load 拉数据，render 返回卡片内部 HTML ──
+// 新规卡封面：按标签挑图标和配色（公文截图当封面不好看）
+const RULE_THEME = [[/社保|医保|养老|医疗/, '🏥', '#0f766e', '#155e75'], [/个税|收入|工资/, '💴', '#a16207', '#7c2d12'], [/交通|出行|电动|汽车|驾/, '🚗', '#1d4ed8', '#0f172a'],
+  [/教育|学校|儿童|育儿|学生/, '🎒', '#7c3aed', '#1e3a8a'], [/消费|购物|食品|产品/, '🛒', '#be123c', '#7c2d12'], [/金融|投资|保险|银行/, '🏦', '#0369a1', '#1e1b4b'],
+  [/网络|数据|信息|AI/, '🛡', '#4338ca', '#0f172a'], [/生态|环境|环保/, '🌿', '#15803d', '#064e3b'], [/安全|应急|消防/, '🚨', '#b91c1c', '#450a0a']];
 const CARDS = [
   // 市场 · 汇率：三大指数 + 今日异动（market-board 重点股票里涨跌幅最大的 4 只，带 logo）+ 一行汇率
   { key: 'fx', repo: 'market-board', load: () => Promise.all([getJSON(ORIGIN + 'market-board/market.json'), getJSON(ORIGIN + 'market-board/fx.json'), getJSON(ORIGIN + 'market-board/config.json')]), render([m, d, cfg]) {
@@ -263,7 +273,7 @@ const CARDS = [
     const tile = ({ id, q }) => {
       let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 360;
       const name = String(q.f14 || id).replace(/-[A-Z]+$/, '');
-      return `<div class="mv ${cls(q.f3)}"><span class="mv-logo" style="--h:${h}">${esc(name.charAt(0))}<img src="${ORIGIN}market-board/logos/${esc(id)}.png" alt="" loading="lazy" onerror="this.remove()"></span>
+      return `<div class="mv ${cls(q.f3)}"><span class="mv-logo" style="--h:${h}">${esc(name.charAt(0))}<img src="${ORIGIN}market-board/logos/${esc(id)}.png" alt="" onload="this.classList.add('ok')" onerror="this.remove()"></span>
         <span class="mv-n">${esc(name)}</span><span class="mv-p ${cls(q.f3)}">${pct(q.f3)}</span></div>`;
     };
     const R = d.ref.rates, days = Object.keys(d.history).sort();
@@ -281,9 +291,10 @@ const CARDS = [
   { key: 'hot', repo: 'hot-news', load: () => getJSON(ORIGIN + 'hot-news/data.json'), render(d, el) {
     const ev = d.events.slice(0, 5), img = ev[0]?.image;
     el.classList.toggle('noimg', !img);
+    GO.hot = ev[0]?.id ? '#/item/event/' + ev[0].id : '';
     return `<div class="hero">${img ? `<div class="bg" style="background-image:${bgUrl(img)}"></div>` : ''}
         ${label('全网热榜', 'hot-news')}<div class="tt ell">1 · ${esc(ev[0]?.title || '—')}</div></div>
-      <div class="rows">${ev.slice(1).map((e, i) => `<div class="row"><span class="rk ${i < 2 ? 'top' : ''}">${i + 2}</span>${e.image ? `<i class="th" style="background-image:${bgUrl(e.image)}"></i>` : ''}<span class="ell">${esc(e.title)}</span><span class="r">${e.platforms.length} 个平台</span></div>`).join('')}</div>`;
+      <div class="rows">${ev.slice(1).map((e, i) => `<div class="row" ${e.id ? `data-go="#/item/event/${e.id}"` : ''}><span class="rk ${i < 2 ? 'top' : ''}">${i + 2}</span>${e.image ? `<i class="th" style="background-image:${bgUrl(e.image)}"></i>` : ''}<span class="ell">${esc(e.title)}</span><span class="r">${e.platforms.length} 个平台</span></div>`).join('')}</div>`;
   } },
 
   // 短剧：封面铺满，每 8 秒换一部
@@ -292,6 +303,7 @@ const CARDS = [
     DRAMA = items;
     const i = items[dramaIdx % (items.length || 1)];
     if (!i) return label('本周热门短剧', 'short-drama') + '<div class="loading">暂无</div>';
+    GO.drama = '#/item/pick/' + encodeURIComponent(i.title);
     return `<div class="bg" style="background-image:${bgUrl(ORIGIN + 'short-drama/' + i.cover)}"></div>` + label('本周热门短剧', 'short-drama') +
       `<div class="body"><span class="chip">${esc(i.form)}</span><span class="sub">${esc((i.rank_note || '').split('；')[0])}</span>
         <div class="tt">${esc(i.title)}</div><div class="sub ell">本周热播 ${p.items.length} 部 · ${dramaIdx % items.length + 1}/${items.length}</div></div>`;
@@ -315,6 +327,7 @@ const CARDS = [
       if (m > 11 || m < 3) { if (m > 11) y++; m = 3; }
       next = `${y}-${String(m).padStart(2, '0')}-10`;
     }
+    GO.save = '#/item/rate/0';
     return mini('大行 3 年定期', 'savings-rates', `${d.deposit.rates['3年'].toFixed(2)}<small>%</small>`,
       `储蓄国债 ${bond(3)?.toFixed(2) ?? '—'}% / ${bond(5)?.toFixed(2) ?? '—'}%`, live ? `国债发售中 · ${esc(live.kind)}` : `下期国债 ${dayDiff(today, next)} 天后 · ${md(next)}`);
   } },
@@ -332,6 +345,7 @@ const CARDS = [
     const plan = d.plan.map(p => byCode[p.code]).filter(Boolean);
     const open = d.funds.filter(f => f.status !== '暂停').length;
     const planOpen = plan.filter(f => f.status !== '暂停').length;
+    GO.dca = '#/list/funds';
     return mini('纳指定投', 'nasdaq-dca', `${open}<small>/ ${d.funds.length} 只可申购</small>`,
       `我的计划 ${planOpen} / ${plan.length} 只可买`, plan[0] ? `${esc(plan[0].name)} · ${esc(plan[0].status_raw || plan[0].status)}` : '');
   } },
@@ -344,7 +358,8 @@ const CARDS = [
     const posters = [...pool].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
     const tvNew = d.tv.filter(t => t.pub_precise && days(t.pubdate) <= 0 && days(t.pubdate) > -14).length;
     const sales = d.news.concert.filter(c => c.sale && c.date && days(c.date) >= 0).length;
-    return label('本周上新', 'weekly-new') + `<div class="posters">${posters.map(m => `<i style="background-image:${bgUrl(m.cover_local ? ORIGIN + 'weekly-new/' + m.cover_local : m.cover)}"></i>`).join('')}
+    GO.weekly = best ? '#/item/movie/' + best.id : '';
+    return label('本周上新', 'weekly-new') + `<div class="posters">${posters.map(m => `<i data-go="#/item/movie/${m.id}" style="background-image:${bgUrl(m.cover_local ? ORIGIN + 'weekly-new/' + m.cover_local : m.cover)}"></i>`).join('')}
       <div class="info"><div class="big">${best ? best.rating : fresh.length}${best ? '' : '<small>部</small>'}</div>
         <div class="sub ell" style="margin-top:6px">${best ? `《${esc(best.title)}》本周新片最高分` : '本周新上映'}</div>
         <div class="sub ell dim">新片 ${fresh.length} · 新剧综 ${tvNew} · 待开票 ${sales}</div></div></div>`;
@@ -382,6 +397,7 @@ const CARDS = [
     const cut = [...(d.cuts[city]?.items || [])].sort((a, b) => b.pct - a.pct)[0];
     const month = Object.keys(d.sales).sort().pop(), champ = d.sales[month]?.[0];
     const week = d.launches.filter(x => x.status === 'launched' && within(x.date, 7)).length;
+    GO.car = champ ? '#/item/series/' + champ.id : '';
     return (champ?.img ? `<img class="car-img" src="${esc(champ.img)}" alt="" onerror="this.remove()">` : '') +
       mini('车市行情', 'car-deals', `${week}<small>款上市</small>`, champ ? `${+month.slice(4)} 月销冠 ${esc(champ.name)} ${champ.sales.toLocaleString()} 辆` : '',
         cut ? `${esc(city)} ${esc(cut.name)} <span class="down">↓${cut.cut} 万</span>` : '');
@@ -391,20 +407,23 @@ const CARDS = [
     const me = d.apps.find(a => a.key === 'hk:1470042146') || d.apps[0];
     const recent = d.apps.filter(a => within(a.version_date, 7)).length;
     const seen = new Set(), icons = d.apps.filter(a => a.icon && !seen.has(a.name) && seen.add(a.name)).slice(0, 5);
+    GO.apps = me ? '#/item/app/' + me.key : '';
     return label('竞品 · 财经榜', 'appstore-tracker') + `<div class="big" style="font-size:36px;margin-top:auto">${me?.rank ? '#' + me.rank : '未上榜'}</div>
       <div class="sub ell" style="margin-top:6px">${esc(me?.name || '')} · 7 天内 ${recent} 个竞品发版</div>
-      <div class="icons">${icons.map(a => `<img src="${esc(a.icon)}" alt="" title="${esc(a.name)}" onerror="this.style.visibility='hidden'">`).join('')}</div>`;
+      <div class="icons">${icons.map(a => `<img data-go="#/item/app/${esc(a.key)}" src="${esc(a.icon)}" alt="" title="${esc(a.name)}" onerror="this.style.visibility='hidden'">`).join('')}</div>`;
   } },
 
-  { key: 'recall', repo: 'recall-watch', cover: true, load: () => getJSON(ORIGIN + 'recall-watch/data.json'), render(d) {
+  { key: 'recall', repo: 'recall-watch', load: () => getJSON(ORIGIN + 'recall-watch/data.json'), render(d) {
     const since = new Date(Date.now() - 30 * 86400e3 + 8 * 3600e3).toISOString().slice(0, 10);
     const rc = d.recalls.filter(x => x.kind === 'consumer' && x.date >= since);
     const cats = {}; rc.forEach(x => cats[x.cat] = (cats[x.cat] || 0) + 1);
     const top = Object.entries(cats).sort((a, b) => b[1] - a[1])[0];
     const food = d.fails.filter(x => x.kind === 'food' && x.date >= since);
     const pic = d.recalls.find(x => x.kind === 'consumer' && x.img) || d.recalls.find(x => x.img);   // 最新一条带产品照片的召回做封面
-    return (pic ? `<div class="bg" style="background-image:${bgUrl(pic.img)};background-color:#fff;background-size:contain"></div>` : '') + label('消费避坑 · 近 30 天', 'recall-watch') +
-      `<div class="body"><div class="big" style="font-size:34px">${rc.length}<small>起召回</small></div>
+    const art = pic?.url?.match(/art_(\w+)\.html/)?.[1];
+    GO.recall = art ? '#/item/rc/' + art : '#/list/recalls';
+    return label('消费避坑 · 近 30 天', 'recall-watch') + (pic ? `<span class="rc-pic" style="background-image:${bgUrl(pic.img)}"></span>` : '') +
+      `<div class="body" style="${pic ? 'padding-right:96px' : ''}"><div class="big" style="font-size:34px">${rc.length}<small>起召回</small></div>
         <div class="sub ell" style="margin-top:6px">${pic ? `${esc(pic.brand ? pic.brand + '牌' : '')}${esc(pic.product)}` : top ? `${esc(top[0])}最多` : ''}</div>
         <div class="sub ell">食品不合格 ${food.length} 批 · 浙江 ${food.filter(x => x.src === '浙江').length} 批</div></div>`;
   } },
@@ -418,6 +437,7 @@ const CARDS = [
     };
     const p = v => v == null ? '—' : `${v > 0 ? '▲' : v < 0 ? '▼' : ''}${Math.abs(v).toFixed(1)}%`;
     const pork = ch('pork_lean', 7), egg = ch('egg', 7);
+    GO.food = '#/item/veg/pork_lean';
     const m = Object.keys(d.cpi).at(-1), c = d.cpi[m] || {};
     return mini('菜价 · 物价', 'food-prices', `${pork ? pork.last.toFixed(2) : '—'}<small>元/斤 猪肉</small>`,
       `周 <span class="${cls(pork?.chg ?? 0)}">${p(pork?.chg)}</span> · 鸡蛋 ${egg ? egg.last.toFixed(2) : '—'} <span class="${cls(egg?.chg ?? 0)}">${p(egg?.chg)}</span>`,
@@ -426,6 +446,7 @@ const CARDS = [
 
   { key: 'home', repo: 'home-prices', load: () => getJSON(ORIGIN + 'home-prices/data.json'), render(d) {
     const s = d.summary, u = s.counts.used, n = s.counts.new, t = s.tiers.used;
+    GO.home = '#/item/month/' + s.month;
     const p = v => v == null ? '—' : `${v > 100 ? '+' : ''}${(v - 100).toFixed(1)}%`;
     return mini(`70 城房价 · ${+s.month.slice(5)} 月`, 'home-prices', `${u.down}<small>城二手下跌</small>`,
       `二手 ${u.up} 涨 / ${u.down} 跌 · 新房 ${n.up} 涨 / ${n.down} 跌`, t['1'] ? `一线二手同比 ${p(t['1'][1])}` : '');
@@ -435,6 +456,7 @@ const CARDS = [
     const w = d.weeks[0];
     const SHORT = { '新型冠状病毒': '新冠', '流感病毒': '流感', '呼吸道合胞病毒': '合胞病毒', '人偏肺病毒': '人偏肺', '副流感病毒': '副流感' };
     const [name, top] = Object.entries(w.outpatient).sort((a, b) => b[1].rate - a[1].rate)[0] || [];
+    GO.resp = name ? '#/item/pathogen/' + encodeURIComponent(name) : '';
     const chg = c => c == null ? '' : `<span class="${c > 0 ? 'up' : c < 0 ? 'down' : 'dim'}">${c > 0 ? '↑' : c < 0 ? '↓' : ''}${c ? Math.abs(c).toFixed(1) : '持平'}</span>`;
     return mini(`呼吸道 · 第 ${w.week} 周`, 'health-weekly', `${esc(SHORT[name] || name || '—')}<small>${top ? top.rate + '%' : ''}</small>`,
       `门诊头号病原体 ${chg(top?.chg)}`, `南方 ${esc((w.level?.south || '—').replace('水平', ''))} · 北方 ${esc((w.level?.north || '—').replace('水平', ''))}`);
@@ -445,9 +467,11 @@ const CARDS = [
     const next = nm.toISOString().slice(0, 7);
     const nat = d.items.filter(i => i.date.startsWith(next) && !i.region && i.kind !== 'std');
     const hot = [...nat].sort((a, b) => (b.articles.length + (b.kind === 'law' ? 3 : 0)) - (a.articles.length + (a.kind === 'law' ? 3 : 0)))[0];
-    const pic = nat.filter(i => i.img).sort((a, b) => b.articles.length - a.articles.length)[0];       // 报道最多、带配图的一条做封面
-    const show = pic || hot;
-    return (pic ? `<div class="bg" style="background-image:${bgUrl(pic.img)}"></div>` : '') + label('每月新规', 'new-rules') +
+    const show = hot;
+    GO.rules = show ? '#/item/rule/' + encodeURIComponent(show.id) : '';
+    const theme = t => RULE_THEME.find(([re]) => re.test(t));                // 先看标题，再看标签
+    const [ic, c1, c2] = (theme(show?.title || '') || theme((show?.tags || []).join()))?.slice(1) || ['📜', '#1e3a8a', '#0e7490'];
+    return `<div class="bg" style="background:linear-gradient(135deg, ${c1}, ${c2})"></div><span class="rl-ic">${ic}</span>` + label('每月新规', 'new-rules') +
       `<div class="body"><span class="chip">${nat.length} 条 · ${+next.slice(5)} 月起</span>
         <div class="tt">${show ? esc(show.name ? `《${show.name}》` : show.title) : '—'}</div>
         <div class="sub ell">距 ${+next.slice(5)} 月 1 日还有 ${dayDiff(today, next + '-01')} 天</div></div>`;
@@ -455,6 +479,7 @@ const CARDS = [
 
   { key: 'holiday', repo: 'holiday-planner', load: () => getJSON(ORIGIN + 'holiday-planner/data.json'), render(d) {
     const s = d.summary, n = s.next, best = s.top[0];
+    GO.holiday = n ? '#/item/day/cn-' + n.date : '';
     return mini(`拼假 · ${s.plan_year}`, 'holiday-planner', n ? `${n.days}<small>天后 ${esc(n.name)}</small>` : '—',
       n ? `${md(n.date)}${n.est ? '（预估）' : ''} · 还要上 ${n.workdays} 天班` : '', best ? `${esc(best.names[0])}请 ${best.used} 休 ${best.len}` : '');
   } },
@@ -463,6 +488,7 @@ const CARDS = [
     const today = todayCN();
     const add = (iso, n) => { const x = new Date(iso + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
     const next = (d.holidays || []).find(h => add(h.start, -15) >= today);   // 去程（前一天）车票还没开售的最近假期
+    GO.ticket = next ? '#/item/holiday/' + encodeURIComponent(next.year + '-' + next.name) : '';
     return mini('抢票日历', 'ticket-calendar', `${md(add(today, 14))}<small>今天开售</small>`, '12306 预售期 15 天',
       next ? `${esc(next.name)}去程票 ${dayDiff(today, add(next.start, -15))} 天后开售` : '');
   } },
@@ -473,6 +499,7 @@ const CARDS = [
     const open = evs.filter(e => ['报名', '预报名', '确认'].includes(e.type) && days(e.start) <= 0 && days(e.end || e.start) >= 0)
       .sort((a, b) => (a.end || a.start).localeCompare(b.end || b.start));
     const ex = evs.filter(e => e.type === '考试' && days(e.start) >= 0).sort((a, b) => a.start.localeCompare(b.start))[0];
+    GO.exam = (open[0] || ex) ? '#/item/exam/' + (open[0] || ex).x.id : '';
     return mini('考试日历', 'exam-calendar', `${open.length}<small>项正在报名</small>`,
       open[0] ? `${esc(open[0].x.short)} ${md(open[0].end || open[0].start)} 截止` : '暂无报名中', ex ? `下一场 ${esc(ex.x.short)} · ${days(ex.start)} 天后` : '');
   } },
@@ -487,6 +514,7 @@ const CARDS = [
     const base = ORIGIN + 'match-day/';                // 队徽是 match-day 仓库里的相对路径
     const logo = (e, side) => e[side + 'LogoDark'] || e[side + 'Logo'];
     const withLogo = d.events.filter(e => e.ts > now && (e.china || e.major) && e.home !== 'TBD' && logo(e, 'home') && logo(e, 'away'))[0] || pick;
+    GO.match = withLogo ? '#/item/match/' + withLogo.id : '';
     const vs = withLogo && logo(withLogo, 'home') && logo(withLogo, 'away') ? `<div class="vs">
         <img src="${esc(base + logo(withLogo, 'home'))}" alt="" onerror="this.style.visibility='hidden'"><span>${when(withLogo).split(' ')[1]}</span>
         <img src="${esc(base + logo(withLogo, 'away'))}" alt="" onerror="this.style.visibility='hidden'"></div>` : '';
@@ -498,10 +526,11 @@ const CARDS = [
       `<div class="sub l1 ell">${esc(e.home)} vs ${esc(e.away)}</div><div class="sub l2 ell">${esc(e.sport === 'esports' ? e.game : e.league)} · ${when(e).split(' ')[0]}${e.china ? ' · 中国' : ''}</div>`;
   } },
 
-  { key: 'tech', repo: 'tech-news', cover: true, load: () => getJSON(`${SUPABASE_URL}/rest/v1/news_items?select=title,source,date,image_url&order=date.desc,created_at.desc&limit=60`,
+  { key: 'tech', repo: 'tech-news', cover: true, load: () => getJSON(`${SUPABASE_URL}/rest/v1/news_items?select=id,title,source,date,image_url&order=date.desc,created_at.desc&limit=60`,
       { cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } }), render(rows) {
     const today = todayCN(), n = rows.filter(r => r.date === today).length;
     const top = rows.find(r => r.image_url) || rows[0];
+    GO.tech = top?.id ? '#/item/news/' + top.id : '';
     return (top?.image_url ? `<div class="bg" style="background-image:${bgUrl(top.image_url)}"></div>` : '') + label('科技动态', 'tech-news') +
       `<div class="body"><span class="chip">今天 ${n} 条</span><div class="tt">${esc(top?.title || '—')}</div><div class="sub ell">${esc(top?.source || '')} · ${top ? md(top.date) : ''}</div></div>`;
   } },
@@ -510,6 +539,7 @@ const CARDS = [
     const rel = d.items.filter(i => i.kind === 'release');
     const latest = (p, stable) => rel.filter(i => i.platform === p && (stable ? i.stage === '正式版' : true)).sort((a, b) => b.date.localeCompare(a.date))[0];
     const xs = latest('Xcode', true), xb = latest('Xcode'), is = latest('iOS', true);
+    GO.ios = '#/item/ver/Xcode';
     const n7 = d.items.filter(i => within(i.date, 7)).length;
     return mini('iOS 开发动态', 'ios-dev-news', `${esc(xs?.version || '—')}<small>Xcode</small>`,
       xb && xb !== xs ? `${esc(xb.version)} ${esc(xb.stage)} 进行中` : `iOS ${esc(is?.version || '—')}`, `近 7 天 ${n7} 条动态`);
@@ -520,6 +550,7 @@ const CARDS = [
 const LAYOUT = ['fx', 'hot', 'drama', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
   'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
 let MACRO = null, DRAMA = [], dramaIdx = 0;
+const GO = {};                 // 卡片主条目在对应站点里的详情地址（#/item/…），卡片整体点进去直达这条
 const byKey = Object.fromEntries(CARDS.map(c => [c.key, c]));
 const cache = {};
 
@@ -536,15 +567,22 @@ function renderCard(k) {
   if (!el || !(k in cache)) return;
   const x = cache[k];
   if (x.error) { el.innerHTML = label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo) + `<div class="loading">读取失败（${esc(x.error)}）</div>`; return; }
-  try { el.innerHTML = c.render(x.data, el); }
+  try { el.innerHTML = c.render(x.data, el); el.href = siteUrl(c.repo) + (GO[k] || c.hash || ''); }
   catch (e) { console.warn('[Screen]', k, e); el.innerHTML = label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo) + '<div class="loading">数据格式已变化</div>'; }
 }
+// 卡片里单独的条目（热榜某一行、某张海报）直达该条详情，其余位置走整卡链接
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-go]'), card = t?.closest('.card');
+  if (!t || !card) return;
+  e.preventDefault();
+  window.open(siteUrl(byKey[card.id.slice(2)].repo) + t.dataset.go, '_blank', 'noopener');
+});
 // 工具格：清单里的工具页 + 还没有专属卡片的新站点（自动出现，不用改布局）
 function renderTools() {
   const known = new Set(CARDS.map(c => c.repo));
   const list = SITES.filter(s => s.kind === 'tool' || (s.kind === 'data' && !known.has(s.repo)));
   $('#k-tools').innerHTML = `<div class="label"><span class="t">工具 · 其他站点</span><span class="go">${list.length} 个</span></div>
-    <div class="tools">${list.map(s => `<a href="${siteUrl(s.repo)}" target="_blank" rel="noopener">${esc(s.name)}<span>${esc(s.desc || (s.kind === 'data' ? '新站点' : s.repo))} ↗</span></a>`).join('')}</div>`;
+    <div class="tools">${list.map(s => `<a href="${siteUrl(s.repo)}" target="_blank" rel="noopener"><i>${s.icon || '🧰'}</i>${esc(s.name)}<span>${esc(s.desc || (s.kind === 'data' ? '新站点' : s.repo))} ↗</span></a>`).join('')}</div>`;
 }
 function renderHealth() {
   const rs = HEALTH?.repos || [];
