@@ -366,13 +366,15 @@ const CARDS = [
         <div class="days">${day(s, '周六')}${day(u, '周日')}</div></div>`;
   } },
 
-  { key: 'game', repo: 'game-deals', cover: true, load: () => getJSON(ORIGIN + 'game-deals/data.json'), render(d) {
-    const now = (d.epic || []).filter(x => x.kind === 'now' && x.img);
-    const g = now[0] || (d.epic || []).find(x => x.img);
-    const left = t => { const h = Math.max(0, (new Date(t) - Date.now()) / 3600e3); return h >= 24 ? `${Math.floor(h / 24)} 天后结束` : `${Math.floor(h)} 小时后结束`; };
-    return (g ? `<div class="bg" style="background-image:${bgUrl(g.img)}"></div>` : '') + label('喜加一', 'game-deals') +
-      `<div class="body"><span class="chip">${g?.kind === 'now' ? 'Epic 限免' : 'Epic 下周'}</span>
-        <div class="tt">${esc(g?.title || '—')}</div><div class="sub ell">${g?.end ? left(g.end) : ''}${now.length > 1 ? ` · 另有 ${now.length - 1} 款` : ''} · Steam 史低 ${d.summary.steam_lows}</div></div>`;
+  // 喜加一：用户是 PS 港服玩家，卡片显示本月 PS Plus 会员免费游戏 + 港服优惠，点进去直达 PlayStation 标签
+  { key: 'game', repo: 'game-deals', hash: '#ps', cover: true, load: () => getJSON(ORIGIN + 'game-deals/data.json'), render(d) {
+    const mon = d.ps_plus_hk?.monthly || [], deals = d.ps_hk?.deals || [];
+    const on = deals.filter(x => x.pct > 0), top = Math.max(0, ...on.map(x => x.pct));
+    const img = mon.find(x => x.img)?.img || deals.find(x => x.cover)?.cover;
+    return (img ? `<div class="bg" style="background-image:${bgUrl(img)}"></div>` : '') + label('PlayStation 港服', 'game-deals') +
+      `<div class="body"><span class="chip">PS Plus 本月会免</span>
+        <div class="tt">${mon.length ? mon.map(x => esc(x.name)).join(' / ') : '—'}</div>
+        <div class="sub ell">港服优惠 ${on.length} 款${top ? ` · 最高 -${top}%` : ''} · 会员价 ${deals.filter(x => x.plus_price).length} 款</div></div>`;
   } },
 
   { key: 'car', repo: 'car-deals', load: () => getJSON(ORIGIN + 'car-deals/data.json'), render(d) {

@@ -26,7 +26,7 @@ window.PAGES_SITES = [
   { repo: 'match-day', name: '赛程', group: '出行娱乐', kind: 'data' },
   { repo: 'weekly-new', name: '本周上新', group: '出行娱乐', kind: 'data' },
   { repo: 'short-drama', name: '短剧', group: '出行娱乐', kind: 'data' },
-  { repo: 'game-deals', name: '喜加一', group: '出行娱乐', kind: 'data' },
+  { repo: 'game-deals', name: 'PS 港服 · 喜加一', group: '出行娱乐', kind: 'data' },
   { repo: 'car-deals', name: '车市行情', group: '出行娱乐', kind: 'data' },
   // 工具
   { repo: 'img2doc', name: '图片转文档', group: '工具', kind: 'tool', desc: '图片转 Word / Markdown' },
