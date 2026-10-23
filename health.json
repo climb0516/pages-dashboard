@@ -1,14 +1,45 @@
 {
- "updated": "2026-10-23T06:44:00+08:00",
+ "updated": "2026-10-23T09:53:41+08:00",
  "owner": "climb0516",
  "authenticated": true,
  "repos": [
+  {
+   "name": "new-rules",
+   "page": "https://climb0516.github.io/new-rules/",
+   "repo_url": "https://github.com/climb0516/new-rules",
+   "description": "",
+   "pushed_at": "2026-10-23T01:42:03Z",
+   "idle_days": 0.0,
+   "days_left": 60.0,
+   "page_status": 200,
+   "workflows": [
+    {
+     "name": "New Rules Scraper",
+     "path": ".github/workflows/scrape.yml",
+     "state": "active",
+     "url": "https://github.com/climb0516/new-rules/blob/main/.github/workflows/scrape.yml",
+     "cron": "30 23 * * *",
+     "interval_h": 24,
+     "last_run": {
+      "status": "completed",
+      "conclusion": "success",
+      "event": "schedule",
+      "created_at": "2026-10-23T01:41:34Z",
+      "url": "https://github.com/climb0516/new-rules/actions/runs/39885429835"
+     },
+     "last_success_at": "2026-10-23T01:41:34Z",
+     "last_scheduled_at": "2026-10-23T01:41:34Z"
+    }
+   ],
+   "issues": [],
+   "level": "ok"
+  },
   {
    "name": "market-board",
    "page": "https://climb0516.github.io/market-board/",
    "repo_url": "https://github.com/climb0516/market-board",
    "description": "",
-   "pushed_at": "2026-10-22T22:27:52Z",
+   "pushed_at": "2026-10-23T01:38:12Z",
    "idle_days": 0.0,
    "days_left": 60.0,
    "page_status": 200,
@@ -24,11 +55,11 @@
       "status": "completed",
       "conclusion": "success",
       "event": "schedule",
-      "created_at": "2026-10-22T22:27:28Z",
-      "url": "https://github.com/climb0516/market-board/actions/runs/39865096074"
+      "created_at": "2026-10-23T01:37:32Z",
+      "url": "https://github.com/climb0516/market-board/actions/runs/39885054457"
      },
-     "last_success_at": "2026-10-22T22:27:28Z",
-     "last_scheduled_at": "2026-10-22T22:27:28Z"
+     "last_success_at": "2026-10-23T01:37:32Z",
+     "last_scheduled_at": "2026-10-23T01:37:32Z"
     }
    ],
    "issues": [],
@@ -39,7 +70,7 @@
    "page": "https://climb0516.github.io/hot-news/",
    "repo_url": "https://github.com/climb0516/hot-news",
    "description": "",
-   "pushed_at": "2026-10-22T22:14:24Z",
+   "pushed_at": "2026-10-23T01:23:10Z",
    "idle_days": 0.0,
    "days_left": 60.0,
    "page_status": 200,
@@ -55,11 +86,104 @@
       "status": "completed",
       "conclusion": "success",
       "event": "schedule",
-      "created_at": "2026-10-22T22:14:13Z",
-      "url": "https://github.com/climb0516/hot-news/actions/runs/39863435558"
+      "created_at": "2026-10-23T01:22:58Z",
+      "url": "https://github.com/climb0516/hot-news/actions/runs/39883669017"
      },
-     "last_success_at": "2026-10-22T22:14:13Z",
-     "last_scheduled_at": "2026-10-22T22:14:13Z"
+     "last_success_at": "2026-10-23T01:22:58Z",
+     "last_scheduled_at": "2026-10-23T01:22:58Z"
+    }
+   ],
+   "issues": [],
+   "level": "ok"
+  },
+  {
+   "name": "earnings-calendar",
+   "page": "https://climb0516.github.io/earnings-calendar/",
+   "repo_url": "https://github.com/climb0516/earnings-calendar",
+   "description": "",
+   "pushed_at": "2026-10-23T01:18:42Z",
+   "idle_days": 0.0,
+   "days_left": 60.0,
+   "page_status": 200,
+   "workflows": [
+    {
+     "name": "Market Calendar Scraper",
+     "path": ".github/workflows/scrape.yml",
+     "state": "active",
+     "url": "https://github.com/climb0516/earnings-calendar/blob/main/.github/workflows/scrape.yml",
+     "cron": "0 23 * * *",
+     "interval_h": 24,
+     "last_run": {
+      "status": "completed",
+      "conclusion": "success",
+      "event": "schedule",
+      "created_at": "2026-10-23T01:18:27Z",
+      "url": "https://github.com/climb0516/earnings-calendar/actions/runs/39883243392"
+     },
+     "last_success_at": "2026-10-23T01:18:27Z",
+     "last_scheduled_at": "2026-10-23T01:18:27Z"
+    }
+   ],
+   "issues": [],
+   "level": "ok"
+  },
+  {
+   "name": "match-day",
+   "page": "https://climb0516.github.io/match-day/",
+   "repo_url": "https://github.com/climb0516/match-day",
+   "description": "",
+   "pushed_at": "2026-10-23T00:34:46Z",
+   "idle_days": 0.1,
+   "days_left": 59.9,
+   "page_status": 200,
+   "workflows": [
+    {
+     "name": "Match Scraper",
+     "path": ".github/workflows/scrape.yml",
+     "state": "active",
+     "url": "https://github.com/climb0516/match-day/blob/main/.github/workflows/scrape.yml",
+     "cron": "7 */2 * * *",
+     "interval_h": 2,
+     "last_run": {
+      "status": "completed",
+      "conclusion": "success",
+      "event": "schedule",
+      "created_at": "2026-10-23T00:32:09Z",
+      "url": "https://github.com/climb0516/match-day/actions/runs/39878691464"
+     },
+     "last_success_at": "2026-10-23T00:32:09Z",
+     "last_scheduled_at": "2026-10-23T00:32:09Z"
+    }
+   ],
+   "issues": [],
+   "level": "ok"
+  },
+  {
+   "name": "pages-dashboard",
+   "page": "https://climb0516.github.io/pages-dashboard/",
+   "repo_url": "https://github.com/climb0516/pages-dashboard",
+   "description": "",
+   "pushed_at": "2026-10-22T22:44:01Z",
+   "idle_days": 0.1,
+   "days_left": 59.9,
+   "page_status": 200,
+   "workflows": [
+    {
+     "name": "Pages Health Check",
+     "path": ".github/workflows/health.yml",
+     "state": "active",
+     "url": "https://github.com/climb0516/pages-dashboard/blob/main/.github/workflows/health.yml",
+     "cron": "41 * * * *",
+     "interval_h": 1,
+     "last_run": {
+      "status": "in_progress",
+      "conclusion": null,
+      "event": "schedule",
+      "created_at": "2026-10-23T01:53:30Z",
+      "url": "https://github.com/climb0516/pages-dashboard/actions/runs/39886538719"
+     },
+     "last_success_at": "2026-10-22T22:43:49Z",
+     "last_scheduled_at": "2026-10-23T01:53:30Z"
     }
    ],
    "issues": [],
@@ -71,8 +195,8 @@
    "repo_url": "https://github.com/climb0516/recall-watch",
    "description": "",
    "pushed_at": "2026-10-22T21:58:25Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -102,8 +226,8 @@
    "repo_url": "https://github.com/climb0516/ios-dev-news",
    "description": "",
    "pushed_at": "2026-10-22T21:44:33Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -133,8 +257,8 @@
    "repo_url": "https://github.com/climb0516/holiday-planner",
    "description": "",
    "pushed_at": "2026-10-22T21:44:19Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -164,8 +288,8 @@
    "repo_url": "https://github.com/climb0516/hz-weekend",
    "description": "",
    "pushed_at": "2026-10-22T21:38:39Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -195,8 +319,8 @@
    "repo_url": "https://github.com/climb0516/game-deals",
    "description": "",
    "pushed_at": "2026-10-22T21:33:35Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -226,8 +350,8 @@
    "repo_url": "https://github.com/climb0516/short-drama",
    "description": "",
    "pushed_at": "2026-10-22T21:33:28Z",
-   "idle_days": 0.0,
-   "days_left": 60.0,
+   "idle_days": 0.2,
+   "days_left": 59.8,
    "page_status": 200,
    "workflows": [
     {
@@ -252,75 +376,13 @@
    "level": "ok"
   },
   {
-   "name": "match-day",
-   "page": "https://climb0516.github.io/match-day/",
-   "repo_url": "https://github.com/climb0516/match-day",
-   "description": "",
-   "pushed_at": "2026-10-22T21:30:14Z",
-   "idle_days": 0.1,
-   "days_left": 59.9,
-   "page_status": 200,
-   "workflows": [
-    {
-     "name": "Match Scraper",
-     "path": ".github/workflows/scrape.yml",
-     "state": "active",
-     "url": "https://github.com/climb0516/match-day/blob/main/.github/workflows/scrape.yml",
-     "cron": "7 */2 * * *",
-     "interval_h": 2,
-     "last_run": {
-      "status": "completed",
-      "conclusion": "success",
-      "event": "schedule",
-      "created_at": "2026-10-22T21:27:37Z",
-      "url": "https://github.com/climb0516/match-day/actions/runs/39857425540"
-     },
-     "last_success_at": "2026-10-22T21:27:37Z",
-     "last_scheduled_at": "2026-10-22T21:27:37Z"
-    }
-   ],
-   "issues": [],
-   "level": "ok"
-  },
-  {
-   "name": "pages-dashboard",
-   "page": "https://climb0516.github.io/pages-dashboard/",
-   "repo_url": "https://github.com/climb0516/pages-dashboard",
-   "description": "",
-   "pushed_at": "2026-10-22T18:46:33Z",
-   "idle_days": 0.2,
-   "days_left": 59.8,
-   "page_status": 200,
-   "workflows": [
-    {
-     "name": "Pages Health Check",
-     "path": ".github/workflows/health.yml",
-     "state": "active",
-     "url": "https://github.com/climb0516/pages-dashboard/blob/main/.github/workflows/health.yml",
-     "cron": "41 * * * *",
-     "interval_h": 1,
-     "last_run": {
-      "status": "in_progress",
-      "conclusion": null,
-      "event": "schedule",
-      "created_at": "2026-10-22T22:43:49Z",
-      "url": "https://github.com/climb0516/pages-dashboard/actions/runs/39867037302"
-     },
-     "last_success_at": "2026-10-22T18:46:18Z",
-     "last_scheduled_at": "2026-10-22T22:43:49Z"
-    }
-   ],
-   "issues": [],
-   "level": "ok"
-  },
-  {
    "name": "savings-rates",
    "page": "https://climb0516.github.io/savings-rates/",
    "repo_url": "https://github.com/climb0516/savings-rates",
    "description": "",
    "pushed_at": "2026-10-22T14:26:07Z",
-   "idle_days": 0.3,
-   "days_left": 59.7,
+   "idle_days": 0.5,
+   "days_left": 59.5,
    "page_status": 200,
    "workflows": [
     {
@@ -350,8 +412,8 @@
    "repo_url": "https://github.com/climb0516/home-prices",
    "description": "",
    "pushed_at": "2026-10-22T07:38:02Z",
-   "idle_days": 0.6,
-   "days_left": 59.4,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -381,8 +443,8 @@
    "repo_url": "https://github.com/climb0516/health-weekly",
    "description": "",
    "pushed_at": "2026-10-22T07:11:54Z",
-   "idle_days": 0.6,
-   "days_left": 59.4,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -412,8 +474,8 @@
    "repo_url": "https://github.com/climb0516/car-deals",
    "description": "",
    "pushed_at": "2026-10-22T06:32:52Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -443,8 +505,8 @@
    "repo_url": "https://github.com/climb0516/appstore-tracker",
    "description": "",
    "pushed_at": "2026-10-22T05:58:43Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -474,8 +536,8 @@
    "repo_url": "https://github.com/climb0516/nasdaq-dca",
    "description": "",
    "pushed_at": "2026-10-22T05:51:09Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -505,8 +567,8 @@
    "repo_url": "https://github.com/climb0516/food-prices",
    "description": "",
    "pushed_at": "2026-10-22T05:34:17Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -536,8 +598,8 @@
    "repo_url": "https://github.com/climb0516/tech-news",
    "description": "AI-SKILL-tech-news",
    "pushed_at": "2026-10-22T05:34:05Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.8,
+   "days_left": 59.2,
    "page_status": 200,
    "workflows": [
     {
@@ -567,8 +629,8 @@
    "repo_url": "https://github.com/climb0516/exam-calendar",
    "description": "",
    "pushed_at": "2026-10-22T05:14:41Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.9,
+   "days_left": 59.1,
    "page_status": 200,
    "workflows": [
     {
@@ -598,8 +660,8 @@
    "repo_url": "https://github.com/climb0516/weekly-new",
    "description": "",
    "pushed_at": "2026-10-22T05:12:01Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.9,
+   "days_left": 59.1,
    "page_status": 200,
    "workflows": [
     {
@@ -629,8 +691,8 @@
    "repo_url": "https://github.com/climb0516/ticket-calendar",
    "description": "",
    "pushed_at": "2026-10-22T05:11:38Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
+   "idle_days": 0.9,
+   "days_left": 59.1,
    "page_status": 200,
    "workflows": [
     {
@@ -655,75 +717,13 @@
    "level": "ok"
   },
   {
-   "name": "new-rules",
-   "page": "https://climb0516.github.io/new-rules/",
-   "repo_url": "https://github.com/climb0516/new-rules",
-   "description": "",
-   "pushed_at": "2026-10-22T05:11:22Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
-   "page_status": 200,
-   "workflows": [
-    {
-     "name": "New Rules Scraper",
-     "path": ".github/workflows/scrape.yml",
-     "state": "active",
-     "url": "https://github.com/climb0516/new-rules/blob/main/.github/workflows/scrape.yml",
-     "cron": "30 23 * * *",
-     "interval_h": 24,
-     "last_run": {
-      "status": "completed",
-      "conclusion": "success",
-      "event": "push",
-      "created_at": "2026-10-22T04:48:32Z",
-      "url": "https://github.com/climb0516/new-rules/actions/runs/39724431732"
-     },
-     "last_success_at": "2026-10-22T04:48:32Z",
-     "last_scheduled_at": "2026-10-22T01:39:18Z"
-    }
-   ],
-   "issues": [],
-   "level": "ok"
-  },
-  {
-   "name": "earnings-calendar",
-   "page": "https://climb0516.github.io/earnings-calendar/",
-   "repo_url": "https://github.com/climb0516/earnings-calendar",
-   "description": "",
-   "pushed_at": "2026-10-22T05:10:06Z",
-   "idle_days": 0.7,
-   "days_left": 59.3,
-   "page_status": 200,
-   "workflows": [
-    {
-     "name": "Market Calendar Scraper",
-     "path": ".github/workflows/scrape.yml",
-     "state": "active",
-     "url": "https://github.com/climb0516/earnings-calendar/blob/main/.github/workflows/scrape.yml",
-     "cron": "0 23 * * *",
-     "interval_h": 24,
-     "last_run": {
-      "status": "completed",
-      "conclusion": "success",
-      "event": "schedule",
-      "created_at": "2026-10-22T01:19:35Z",
-      "url": "https://github.com/climb0516/earnings-calendar/actions/runs/39705017638"
-     },
-     "last_success_at": "2026-10-22T01:19:35Z",
-     "last_scheduled_at": "2026-10-22T01:19:35Z"
-    }
-   ],
-   "issues": [],
-   "level": "ok"
-  },
-  {
    "name": "img2doc",
    "page": "https://climb0516.github.io/img2doc/",
    "repo_url": "https://github.com/climb0516/img2doc",
    "description": "",
    "pushed_at": "2026-10-14T07:36:40Z",
-   "idle_days": 8.6,
-   "days_left": 51.4,
+   "idle_days": 8.8,
+   "days_left": 51.2,
    "page_status": 200,
    "workflows": [],
    "issues": [],
@@ -735,8 +735,8 @@
    "repo_url": "https://github.com/climb0516/poker-score",
    "description": "",
    "pushed_at": "2026-10-09T07:33:13Z",
-   "idle_days": 13.6,
-   "days_left": 46.4,
+   "idle_days": 13.8,
+   "days_left": 46.2,
    "page_status": 200,
    "workflows": [],
    "issues": [],
@@ -748,8 +748,8 @@
    "repo_url": "https://github.com/climb0516/Climb0516.github.io",
    "description": "基于Hexo创建的个人blog网站",
    "pushed_at": "2018-04-26T08:45:17Z",
-   "idle_days": 3101.6,
-   "days_left": -3041.6,
+   "idle_days": 3101.7,
+   "days_left": -3041.7,
    "page_status": 200,
    "workflows": [],
    "issues": [],
