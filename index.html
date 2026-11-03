@@ -108,6 +108,16 @@
     .k-drama { grid-column: 5; grid-row: 1 / 3; }
     .k-weekly { grid-column: 1 / 3; }
     .k-weekend { grid-column: 3 / 5; }
+    /* 攻略地图：2×2，背景是点亮的中国地图（数据实时读 travel-guide-map 的 guides.json + china-lite.json） */
+    .k-guide { grid-column: span 2; grid-row: span 2; padding: 0; }
+    .k-guide .gmap { position: absolute; inset: 0; }
+    .k-guide .gmap svg { width: 100%; height: 100%; display: block; }
+    .k-guide .gfg { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 16px 18px;
+      background: linear-gradient(90deg, rgba(10,10,12,.82) 0%, rgba(10,10,12,.35) 48%, transparent 70%); }
+    .k-guide .gbig { margin-top: auto; font-size: 44px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+    .k-guide .gbig small { font-size: 16px; font-weight: 500; color: var(--text-2); margin: 0 10px 0 4px; }
+    .k-guide .gsub { font-size: 13.5px; color: var(--text-2); margin-top: 8px; }
+    .k-guide .gsub b { color: #ffb35c; font-weight: 600; }
     /* 工具 · 其他站点：每个一格，和其他卡片一样排进网格，先补满最后一行的空位，多了往下一行行排 */
     .k-tool { justify-content: space-between; }
     .k-tool .ti { position: absolute; right: 16px; top: 38px; font-size: 46px; font-style: normal; opacity: .9; }
@@ -198,7 +208,8 @@
       .bento > * { grid-column: auto !important; grid-row: auto !important; }
       .k-fx, .k-hot { grid-column: 1 / 3 !important; grid-row: span 2 !important; }
       .k-drama { grid-row: span 2 !important; }
-      .k-weekly, .k-weekend { grid-column: 1 / 3 !important; }
+      .k-weekly, .k-weekend, .k-guide { grid-column: 1 / 3 !important; }
+      .k-guide { grid-row: span 2 !important; }
       .mv-logo { width: 38px; height: 38px; } .mini .big { font-size: 30px; }
       header { position: static; height: auto; padding-top: 0; background: none; }
     }
@@ -483,6 +494,23 @@ const CARDS = [
         <div class="sub ell">距 ${+next.slice(5)} 月 1 日还有 ${dayDiff(today, next + '-01')} 天</div></div>`;
   } },
 
+  // 攻略地图：点亮的城市整块橙色 + 光点，省界淡线；前景写点亮数、最新一份攻略
+  { key: 'guide', repo: 'travel-guide-map', load: () => Promise.all([getJSON(ORIGIN + 'travel-guide-map/guides.json'), getJSON(ORIGIN + 'travel-guide-map/china-lite.json')]), render([gs, m]) {
+    const lit = new Set(gs.map(g => +g.adcode)), units = m.units.filter(u => lit.has(u.a));
+    const provs = new Set(units.map(u => u.p)), days = gs.reduce((t, g) => t + (+g.days || 0), 0);
+    const last = [...gs].sort((a, b) => String(b.updated || '').localeCompare(String(a.updated || '')))[0];
+    const [x, y, w, h] = m.vb;
+    const svg = `<svg viewBox="${x} ${y} ${w} ${h}" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">
+      <defs><filter id="gglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+      <g fill="rgba(255,255,255,.085)">${m.units.map(u => `<path d="${u.d}"/>`).join('')}</g>
+      <path d="${m.prov}" fill="none" stroke="rgba(255,255,255,.24)" stroke-width="1"/>
+      <g fill="#ff8a3d">${units.map(u => `<path d="${u.d}"/>`).join('')}</g>
+      <g filter="url(#gglow)" fill="#ff8a3d" opacity=".9">${units.map(u => `<circle cx="${u.c[0]}" cy="${u.c[1]}" r="16"/>`).join('')}</g>
+      <g fill="#ffd9b3" stroke="#ff8a3d" stroke-width="2">${units.map(u => `<circle cx="${u.c[0]}" cy="${u.c[1]}" r="5"/>`).join('')}</g></svg>`;
+    return `<div class="gmap">${svg}</div><div class="gfg">${label('攻略地图 · 去过的城市点亮', 'travel-guide-map')}
+      <div class="gbig">${lit.size}<small>城</small>${provs.size}<small>省</small>${days}<small>天</small></div>
+      <div class="gsub">${last ? `最新：<b>${esc(last.title || last.city)}</b> · ${esc(String(last.updated || '').slice(5))}` : '还没有攻略'} · 点进去看地图、提需求</div></div>`;
+  } },
   { key: 'holiday', repo: 'holiday-planner', load: () => getJSON(ORIGIN + 'holiday-planner/data.json'), render(d) {
     const s = d.summary, n = s.next, best = s.top[0];
     GO.holiday = n ? '#/item/day/cn-' + n.date : '';
@@ -554,7 +582,7 @@ const CARDS = [
 
 // 格子顺序（auto-flow 依次填入 7×5）
 const LAYOUT = ['fx', 'hot', 'drama', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
-  'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
+  'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'guide', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
 let MACRO = null, DRAMA = [], dramaIdx = 0;
 const GO = {};                 // 卡片主条目在对应站点里的详情地址（#/item/…），卡片整体点进去直达这条
 const byKey = Object.fromEntries(CARDS.map(c => [c.key, c]));
@@ -564,7 +592,7 @@ function shell() {
   $('#bento').innerHTML = LAYOUT.map(k => {
     if (k === 'tools') return `<div class="card k-tools" id="k-tools"></div>`;
     const c = byKey[k];
-    return `<a class="card k-${k} ${c.cover ? 'cover' : ''} ${(['fx', 'hot', 'weekly', 'apps'].includes(k) || c.cover) ? '' : 'mini'}" id="k-${k}" href="${siteUrl(c.repo)}${c.hash || ''}" target="_blank" rel="noopener">
+    return `<a class="card k-${k} ${c.cover ? 'cover' : ''} ${(['fx', 'hot', 'weekly', 'apps', 'guide'].includes(k) || c.cover) ? '' : 'mini'}" id="k-${k}" href="${siteUrl(c.repo)}${c.hash || ''}" target="_blank" rel="noopener">
       ${label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo)}<div class="loading">加载中…</div></a>`;
   }).join('');
 }
@@ -586,7 +614,7 @@ document.addEventListener('click', e => {
 // 工具格：清单里的工具页 + 还没有专属卡片的新站点（自动出现，不用改布局）
 function renderTools() {
   const known = new Set(CARDS.map(c => c.repo));
-  const list = SITES.filter(s => s.kind === 'tool' || (s.kind === 'data' && !known.has(s.repo)));
+  const list = SITES.filter(s => !known.has(s.repo) && (s.kind === 'tool' || s.kind === 'data'));
   const ph = $('#k-tools'); if (!ph) return;
   ph.outerHTML = list.map(s => `<a class="card k-tool" href="${siteUrl(s.repo)}" target="_blank" rel="noopener">
     <div class="label"><span class="t">${s.kind === 'data' ? '新站点' : '工具'}</span><span class="go">↗</span></div>
