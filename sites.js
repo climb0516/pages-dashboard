@@ -28,6 +28,7 @@ window.PAGES_SITES = [
   { repo: 'short-drama', name: '短剧', group: '出行娱乐', kind: 'data' },
   { repo: 'game-deals', name: 'PS 港服 · 喜加一', group: '出行娱乐', kind: 'data' },
   { repo: 'car-deals', name: '车市行情', group: '出行娱乐', kind: 'data' },
+  { repo: 'travel-guide-map', name: '攻略地图', group: '出行娱乐', kind: 'tool', desc: '去过的城市点亮', icon: '🗺' },
   // 工具
   { repo: 'img2doc', name: '图片转文档', group: '工具', kind: 'tool', desc: '图片转 Word / Markdown', icon: '🖼' },
   { repo: 'poker-score', name: '德扑计分器', group: '工具', kind: 'tool', desc: '牌局记账与结算', icon: '🃏' },
