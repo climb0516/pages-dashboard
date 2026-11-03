@@ -109,7 +109,7 @@
     .k-weekly { grid-column: 1 / 3; }
     .k-weekend { grid-column: 3 / 5; }
     /* 攻略地图：2×2，背景是点亮的中国地图（数据实时读 travel-guide-map 的 guides.json + china-lite.json） */
-    .k-guide { grid-column: span 2; grid-row: span 2; padding: 0; }
+    .k-guide { grid-column: 6 / 8; grid-row: 1 / 3; padding: 0; }   /* 第一屏右上角 */
     .k-guide .gmap { position: absolute; inset: 0; }
     .k-guide .gmap svg { width: 100%; height: 100%; display: block; }
     .k-guide .gfg { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 16px 18px;
@@ -581,8 +581,8 @@ const CARDS = [
 ];
 
 // 格子顺序（auto-flow 依次填入 7×5）
-const LAYOUT = ['fx', 'hot', 'drama', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
-  'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'guide', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
+const LAYOUT = ['fx', 'hot', 'drama', 'guide', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
+  'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
 let MACRO = null, DRAMA = [], dramaIdx = 0;
 const GO = {};                 // 卡片主条目在对应站点里的详情地址（#/item/…），卡片整体点进去直达这条
 const byKey = Object.fromEntries(CARDS.map(c => [c.key, c]));
