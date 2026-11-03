@@ -29,9 +29,9 @@
       --warn: #f5b94a;
       --err: #ff6b6b;
     }
-    html, body { height: 100%; }
+    html, body { min-height: 100%; }
     body {
-      background: var(--bg); color: var(--text-1); overflow: hidden;
+      background: var(--bg); color: var(--text-1); overflow-x: hidden;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
       font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
       font-feature-settings: 'tnum' 1, 'cv11' 1;
@@ -39,12 +39,13 @@
     a { color: inherit; text-decoration: none; }
     button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 
-    /* 1920×1080 画布，等比缩放铺满窗口 */
-    #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0;
-      padding: 26px 40px 32px; display: grid; grid-template-rows: 52px 1fr; gap: 18px;
+    /* 1920 宽的画布，按窗口宽度等比缩放（zoom）；高度不锁死，卡片多了往下加行、页面上下滚动 */
+    #stage { position: relative; width: 1920px; min-height: 1080px;
+      padding: 0 40px 32px; display: grid; grid-template-rows: auto auto; gap: 18px; align-content: start;
       background: radial-gradient(1100px 380px at 50% -120px, rgba(139,156,255,0.10), transparent 70%); }
 
-    header { display: flex; align-items: center; gap: 20px; }
+    header { display: flex; align-items: center; gap: 20px; height: 78px; padding-top: 26px; position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(var(--bg) 82%, transparent); }   /* 滚动时顶部栏一直在 */
     .brand { display: flex; align-items: baseline; gap: 14px; }
     .brand b { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
     .brand b::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(139,156,255,0.18); }
@@ -63,8 +64,8 @@
     .dots a:hover::after { content: attr(data-t); position: absolute; top: 16px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #000;
       border: 1px solid var(--hair-2); color: var(--text-1); font-size: 12px; padding: 4px 8px; border-radius: 6px; z-index: 5; }
 
-    /* 便当格：7 列 × 5 行 */
-    .bento { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 14px; min-height: 0; }
+    /* 便当格：7 列，每行固定高（和原来一屏 5 行时一样），卡片多了自动往下加行 */
+    .bento { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 179px; grid-auto-flow: row dense; gap: 14px; min-height: 0; }
     .card { position: relative; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; padding: 16px 18px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; transition: border-color .15s; }
     a.card:hover { border-color: var(--hair-2); }
@@ -107,7 +108,12 @@
     .k-drama { grid-column: 5; grid-row: 1 / 3; }
     .k-weekly { grid-column: 1 / 3; }
     .k-weekend { grid-column: 3 / 5; }
-    .k-tools { grid-column: span 3; }
+    /* 工具 · 其他站点：每个一格，和其他卡片一样排进网格，先补满最后一行的空位，多了往下一行行排 */
+    .k-tool { justify-content: space-between; }
+    .k-tool .ti { position: absolute; right: 16px; top: 38px; font-size: 46px; font-style: normal; opacity: .9; }
+    .k-tool b { font-size: 20px; font-weight: 700; margin-top: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .k-tool span.d { font-size: 12.5px; color: var(--text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    a.k-tool:hover b { color: var(--accent); }
 
     /* 市场 · 汇率：三大指数、今日异动（logo 方块）、底部一行汇率 */
     .fx-pairs { display: flex; gap: 20px; margin-top: 14px; }
@@ -172,7 +178,7 @@
     .icons { display: flex; gap: 7px; margin-top: 10px; }
     .icons img { width: 32px; height: 32px; border-radius: 8px; background: var(--card-2); }
     /* 工具 */
-    .tools { display: flex; gap: 10px; flex: 1; margin-top: 10px; min-height: 0; }        /* 三个入口铺满卡片，不留大片空白 */
+    .tools { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 10px; flex: 1; margin-top: 10px; min-height: 0; }
     .tools a { flex: 1; min-width: 0; background: var(--card-2); border-radius: 14px; padding: 14px 16px; font-size: 16px; font-weight: 700; transition: color .15s, transform .15s;
       display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
     .tools a:hover { transform: translateY(-2px); }
@@ -183,18 +189,18 @@
     /* 手机：取消画布缩放，两列可滚动 */
     @media (max-width: 760px) {
       body { overflow: auto; }
-      #stage { position: static; width: auto; height: auto; transform: none !important; padding: 16px 14px 28px; display: block; background: none; }
+      #stage { position: static; width: auto; min-height: 0; zoom: 1 !important; padding: 16px 14px 28px; display: block; background: none; }
       header { flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
       .meta, .clock, #fs { display: none; }
       .hp { order: 3; width: 100%; height: auto; padding: 8px 12px; flex-wrap: wrap; border-radius: 12px; row-gap: 6px; }
       #hpText { white-space: nowrap; } .dots { flex-wrap: wrap; }
-      .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 158px; gap: 10px; }
+      .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 158px; gap: 10px; grid-auto-flow: row; }
       .bento > * { grid-column: auto !important; grid-row: auto !important; }
       .k-fx, .k-hot { grid-column: 1 / 3 !important; grid-row: span 2 !important; }
       .k-drama { grid-row: span 2 !important; }
-      .k-weekly, .k-weekend, .k-tools { grid-column: 1 / 3 !important; }
+      .k-weekly, .k-weekend { grid-column: 1 / 3 !important; }
       .mv-logo { width: 38px; height: 38px; } .mini .big { font-size: 30px; }
-      .tools { flex-direction: column; gap: 6px; } .k-tools { grid-row: span 2 !important; }
+      header { position: static; height: auto; padding-top: 0; background: none; }
     }
   </style>
 </head>
@@ -581,8 +587,10 @@ document.addEventListener('click', e => {
 function renderTools() {
   const known = new Set(CARDS.map(c => c.repo));
   const list = SITES.filter(s => s.kind === 'tool' || (s.kind === 'data' && !known.has(s.repo)));
-  $('#k-tools').innerHTML = `<div class="label"><span class="t">工具 · 其他站点</span><span class="go">${list.length} 个</span></div>
-    <div class="tools">${list.map(s => `<a href="${siteUrl(s.repo)}" target="_blank" rel="noopener"><i>${s.icon || '🧰'}</i>${esc(s.name)}<span>${esc(s.desc || (s.kind === 'data' ? '新站点' : s.repo))} ↗</span></a>`).join('')}</div>`;
+  const ph = $('#k-tools'); if (!ph) return;
+  ph.outerHTML = list.map(s => `<a class="card k-tool" href="${siteUrl(s.repo)}" target="_blank" rel="noopener">
+    <div class="label"><span class="t">${s.kind === 'data' ? '新站点' : '工具'}</span><span class="go">↗</span></div>
+    <i class="ti">${s.icon || '🧰'}</i><b>${esc(s.name)}</b><span class="d">${esc(s.desc || (s.kind === 'data' ? '还没有专属卡片' : s.repo))}</span></a>`).join('');
 }
 function renderHealth() {
   const rs = HEALTH?.repos || [];
@@ -610,9 +618,8 @@ async function load() {
 // ── 画布缩放、时钟、全屏 ──
 function fit() {
   const st = $('#stage');
-  if (innerWidth <= 760) { st.style.transform = ''; return; }
-  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
-  st.style.transform = `scale(${s}) translate(-50%, -50%)`;
+  if (innerWidth <= 760) { st.style.zoom = ''; return; }
+  st.style.zoom = document.documentElement.clientWidth / 1920;   // 只按宽度缩放（不含滚动条），高度随内容，页面可以上下滚动
 }
 function tick() {
   const now = new Date();
