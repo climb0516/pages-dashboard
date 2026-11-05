@@ -661,6 +661,59 @@ const SITES = [
           <div class="row"><span class="l muted">统计局 ${esc(s.published)} 发布</span><span class="r"></span></div></div>`;
     },
   },
+  {
+    repo: 'hz-weekend', title: '🌤️ 杭州周末', color: '#38bdf8',
+    load: () => getJSON(ORIGIN + 'hz-weekend/data.json'),
+    render(d) {
+      const [sat, sun] = d.weekend, by = Object.fromEntries((d.daily || []).map(x => [x.date, x]));
+      const rainy = x => x && (x.pop >= 60 || x.rain >= 5 || /雨|雪/.test(x.text || ''));
+      const s = by[sat], u = by[sun];
+      const verdict = !s && !u ? '预报未出' : rainy(s) && rainy(u) ? '两天有雨' : rainy(s) ? '周六有雨' : rainy(u) ? '周日有雨' : '适合出门';
+      const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+      const on = x => (!x.start || x.start.slice(0, 10) <= sun) && (!x.end || x.end.slice(0, 10) >= sat);
+      const exh = (d.exhibitions || []).filter(on).sort((a, b) => (a.end || '9').localeCompare(b.end || '9'));
+      const ev = (d.events || []).filter(on);
+      const day = (x, n) => `<div class="stat"><div class="k">${n} ${x ? md(x.date) : ''}</div><div class="v num">${x ? `${x.tmin}~${x.tmax}°` : '—'}</div><div class="s muted">${x ? `${esc(x.text || '')} · 降水 ${x.pop ?? '—'}%` : '预报未出'}</div></div>`;
+      return `<div class="stats">${day(s, '周六')}${day(u, '周日')}
+          <div class="stat"><div class="k">本周末在展</div><div class="v num">${exh.length} 个</div><div class="s muted">${ev.length} 场活动 · ${verdict}</div></div></div>
+        <div class="rows">${exh.slice(0, 5).map(x => `<a class="row" href="${esc(x.url || ORIGIN + 'hz-weekend/')}" target="_blank" rel="noopener"><span class="l">${esc(x.title)}</span><span class="r">${esc(x.venue || '')}${x.end ? ` · 到 ${md(x.end)}` : ''}</span></a>`).join('') || '<div class="row"><span class="l muted">本周末没有在展的展览</span><span class="r"></span></div>'}</div>`;
+    },
+  },
+  {
+    repo: 'recall-watch', title: '🛡️ 消费避坑', color: '#f87171',
+    load: () => getJSON(ORIGIN + 'recall-watch/data.json'),
+    render(d) {
+      const since = new Date(Date.now() - 30 * 86400e3 + 8 * 3600e3).toISOString().slice(0, 10);
+      const md = t => `${+t.slice(5, 7)}/${+t.slice(8, 10)}`;
+      const rc = d.recalls.filter(x => x.date >= since), cons = rc.filter(x => x.kind === 'consumer'), auto = rc.filter(x => x.kind === 'auto');
+      const food = d.fails.filter(x => x.kind === 'food' && x.date >= since);
+      const grp = {}; food.forEach(x => { if (x.group) grp[x.group] = (grp[x.group] || 0) + 1; });
+      const topG = Object.entries(grp).sort((a, b) => b[1] - a[1])[0];
+      const units = auto.reduce((t, x) => t + (+x.qty || 0), 0);
+      const bad = (d.sources || []).filter(x => x.ok === false).map(x => x.name);
+      return `<div class="stats">
+          <div class="stat"><div class="k">消费品召回 · 30 天</div><div class="v num">${cons.length} 起</div><div class="s muted">汽车召回 ${auto.length} 起</div></div>
+          <div class="stat"><div class="k">涉及车辆</div><div class="v num">${units ? units.toLocaleString('en-US') : '—'}</div><div class="s muted">辆</div></div>
+          <div class="stat"><div class="k">食品不合格 · 30 天</div><div class="v num">${food.length} 批</div><div class="s muted">${topG ? `${esc(topG[0])}最多（${topG[1]}）` : '—'}</div></div></div>
+        <div class="rows">${rc.slice(0, 5).map(x => `<a class="row" href="${esc(x.url)}" target="_blank" rel="noopener"><span class="l">${esc(x.kind === 'auto' ? `${x.brand || '汽车'} · 召回 ${x.qty ? (+x.qty).toLocaleString('en-US') + (x.unit || '辆') : ''}` : `${x.brand ? x.brand + ' · ' : ''}${x.product || x.title}`)}</span><span class="r">${esc(x.cat || '')} · ${md(x.date)}</span></a>`).join('')}
+          ${bad.length ? `<div class="row"><span class="l muted">暂用旧数据：${esc(bad.join('、'))}</span><span class="r"></span></div>` : ''}</div>`;
+    },
+  },
+  {
+    repo: 'travel-guide-map', title: '🗺️ 攻略地图', color: '#ff8a3d',
+    load: () => getJSON(ORIGIN + 'travel-guide-map/guides.json'),
+    render(gs) {
+      const lit = new Set(gs.flatMap(g => [g.adcode, ...(g.also_adcodes || [])].map(Number)));
+      const prov = new Set(gs.flatMap(g => [g.adcode, ...(g.also_adcodes || [])].map(a => Math.floor(+a / 10000))));
+      const days = gs.reduce((t, g) => t + (+g.days || 0), 0);
+      const list = [...gs].sort((a, b) => String(b.updated || '').localeCompare(String(a.updated || '')));
+      return `<div class="stats">
+          <div class="stat"><div class="k">点亮城市</div><div class="v num">${lit.size} 城</div><div class="s muted">${prov.size} 个省级行政区</div></div>
+          <div class="stat"><div class="k">攻略</div><div class="v num">${gs.length} 份</div><div class="s muted">合计 ${days} 天</div></div>
+          <div class="stat"><div class="k">最近更新</div><div class="v num">${list[0] ? esc(String(list[0].updated).slice(5)) : '—'}</div><div class="s muted">${list[0] ? esc(list[0].title || list[0].city) : ''}</div></div></div>
+        <div class="rows">${list.slice(0, 6).map(g => `<a class="row" href="${ORIGIN}travel-guide-map/${esc(g.url)}" target="_blank" rel="noopener"><span class="l">${esc(g.title || g.city)}</span><span class="r">${esc(g.days ? `${g.days} 天 · ` : '')}${esc(String(g.updated || '').slice(5))} 更新</span></a>`).join('')}</div>`;
+    },
+  },
 ];
 
 // ── 卡片渲染 ──

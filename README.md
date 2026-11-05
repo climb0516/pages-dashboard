@@ -148,8 +148,8 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 | tech | tech-news | Supabase `news_items` | 有 |
 | ios | ios-dev-news | `data.json` | 有 |
 | apps | appstore-tracker | `data.json` | 有 |
-| weekend | hz-weekend | `data.json` | 无 |
-| recall | recall-watch | `data.json` | 无 |
+| weekend | hz-weekend | `data.json` | 有 |
+| recall | recall-watch | `data.json` | 有 |
 | food | food-prices | `data.json` | 有 |
 | home | home-prices | `data.json` | 有 |
 | resp | health-weekly | `data.json` | 有 |
@@ -162,7 +162,7 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 | drama | short-drama | `picks.json`、`data.json` | 有 |
 | game | game-deals | `data.json` | 有 |
 | car | car-deals | `data.json` | 有 |
-| guide | travel-guide-map | `guides.json`、`china-lite.json` | 无 |
+| guide | travel-guide-map | `guides.json`、`china-lite.json` | 有（详情模式只读 `guides.json`） |
 | tools | img2doc、poker-score、Climb0516.github.io | 不读数据，`sites.js` 里没有专属卡片的站点自动出现 | — |
 
 ---
