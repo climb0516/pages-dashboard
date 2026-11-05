@@ -117,7 +117,7 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 | ticket-calendar | `holidays[].{name,start}` |
 | exam-calendar | `exams.json` 的 `exams[].{short,sessions[].events[].{type,start,end}}` |
 | match-day | `events[].{ts,sport,game,league,home,away,stage,china,major}` |
-| travel-guide-map | `guides.json` 的 `[].{adcode,days,updated,title,city}`、`china-lite.json` 的 `vb`、`prov`、`units[].{a,p,c,d}` |
+| travel-guide-map | `guides.json` 的 `[].{adcode,also_adcodes,days,updated,title,city}`、`china-lite.json` 的 `vb`、`prov`、`units[].{a,p,c,d}` |
 
 ---
 
@@ -281,7 +281,7 @@ localStorage
 | ios | ios-dev-news | `#/item/ver/Xcode` |
 
   条目已下榜、目标站找不到这条时的提示由目标站的 kit 组件负责，本站不处理。
-- **攻略地图卡片**（2×2）：用 `china-lite.json` 的 `units` 画全国底图，`guides.json` 里 `adcode` 对应的城市橙色填充 + 光点，前景写「N 城 N 省 N 天」和最新一份攻略；目前只读 `adcode`，不读 `also_adcodes`
+- **攻略地图卡片**（2×2）：用 `china-lite.json` 的 `units` 画全国底图，`guides.json` 里 `adcode` 和 `also_adcodes`（一份攻略跨多座城市，如潮汕 = 潮州 + 汕头）对应的城市橙色填充 + 光点，前景写「N 城 N 省 N 天」（城数按点亮的城市算）和最新一份攻略
 
 ---
 

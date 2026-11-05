@@ -496,7 +496,7 @@ const CARDS = [
 
   // 攻略地图：点亮的城市整块橙色 + 光点，省界淡线；前景写点亮数、最新一份攻略
   { key: 'guide', repo: 'travel-guide-map', load: () => Promise.all([getJSON(ORIGIN + 'travel-guide-map/guides.json'), getJSON(ORIGIN + 'travel-guide-map/china-lite.json')]), render([gs, m]) {
-    const lit = new Set(gs.map(g => +g.adcode)), units = m.units.filter(u => lit.has(u.a));
+    const lit = new Set(gs.flatMap(g => [g.adcode, ...(g.also_adcodes || [])].map(Number))), units = m.units.filter(u => lit.has(u.a));
     const provs = new Set(units.map(u => u.p)), days = gs.reduce((t, g) => t + (+g.days || 0), 0);
     const last = [...gs].sort((a, b) => String(b.updated || '').localeCompare(String(a.updated || '')))[0];
     const [x, y, w, h] = m.vb;
