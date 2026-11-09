@@ -131,6 +131,21 @@
     .fx-pairs span { font-size: 12px; color: var(--text-3); }
     .fx-pairs b { font-size: 18px; font-weight: 600; }
     .fx-pairs i { font-style: normal; font-size: 12px; }
+    /* 行情为什么动：2×2，A股看盘指标 + 今日异动 + 大事 */
+    .k-why { grid-column: span 2; grid-row: span 2; padding: 18px 20px; }
+    .why-kpi { display: flex; gap: 8px 18px; flex-wrap: wrap; margin-top: 12px; font-size: 12.5px; color: var(--text-3); align-items: baseline; }
+    .why-kpi b { color: var(--text-1); font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+    .why-kpi b.up { color: var(--up); } .why-kpi b.down { color: var(--down); }
+    .why-rows { display: flex; flex-direction: column; margin-top: 6px; min-height: 0; }
+    .why-row { display: flex; align-items: center; gap: 10px; height: 31px; font-size: 13.5px; min-width: 0; border-bottom: 1px solid var(--hair); }
+    .why-row:last-child { border-bottom: 0; }
+    .why-row:hover .ell { color: var(--text-1); text-decoration: underline; text-underline-offset: 3px; }
+    .why-row .bx { flex: none; min-width: 64px; text-align: center; font-weight: 600; font-size: 12.5px; border-radius: 6px; padding: 2px 6px; font-variant-numeric: tabular-nums; }
+    .why-row .bx.up { background: rgba(242,85,90,.16); } .why-row .bx.down { background: rgba(34,192,138,.16); }
+    .why-row .mk { flex: none; font-weight: 600; color: var(--text-1); max-width: 82px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .why-row .tm { flex: none; color: var(--text-3); font-size: 12px; }
+    .why-row .ell { color: var(--text-2); min-width: 0; }
+    .why-row .rk { width: 16px; }
     .mv-title { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-3); margin-top: 14px; }
     .mv-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
     .mv { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-width: 0; padding: 8px 4px; border-radius: 12px; background: var(--card-2); }
@@ -206,7 +221,7 @@
       #hpText { white-space: nowrap; } .dots { flex-wrap: wrap; }
       .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 158px; gap: 10px; grid-auto-flow: row; }
       .bento > * { grid-column: auto !important; grid-row: auto !important; }
-      .k-fx, .k-hot { grid-column: 1 / 3 !important; grid-row: span 2 !important; }
+      .k-fx, .k-hot, .k-why { grid-column: 1 / 3 !important; grid-row: span 2 !important; }
       .k-drama { grid-row: span 2 !important; }
       .k-weekly, .k-weekend, .k-guide { grid-column: 1 / 3 !important; }
       .k-guide { grid-row: span 2 !important; }
@@ -324,6 +339,27 @@ const CARDS = [
     return `<div class="bg" style="background-image:${bgUrl(ORIGIN + 'short-drama/' + i.cover)}"></div>` + label('本周热门短剧', 'short-drama') +
       `<div class="body"><span class="chip">${esc(i.form)}</span><span class="sub">${esc((i.rank_note || '').split('；')[0])}</span>
         <div class="tt">${esc(i.title)}</div><div class="sub ell">本周热播 ${p.items.length} 部 · ${dramaIdx % items.length + 1}/${items.length}</div></div>`;
+  } },
+
+  // 行情为什么动：A股看盘指标（analysis.json）+ 今日最显著的 4 段异动及可能原因 + 影响市场的大事前 2（data.json）
+  { key: 'why', repo: 'market-why', load: () => Promise.all([getJSON(ORIGIN + 'market-why/data.json'), getJSON(ORIGIN + 'market-why/analysis.json').catch(() => null)]), render([d, a]) {
+    const news = id => d.news.find(n => n.id === id);
+    const yi = v => v == null ? '—' : Math.abs(v) >= 1e12 ? (v / 1e12).toFixed(2) + '万亿' : (v / 1e8).toFixed(0) + '亿';
+    const hhmm = ts => new Date((ts + 8 * 3600) * 1000).toISOString().slice(11, 16);
+    const moves = [];
+    d.markets.forEach(m => m.moves.forEach((mv, i) => moves.push({ m, mv, i })));
+    moves.sort((x, y) => Math.abs(y.mv.chg) / y.m.th - Math.abs(x.mv.chg) / x.m.th);
+    const top = moves.slice(0, 4).sort((x, y) => y.mv.end - x.mv.end);
+    const kpi = a ? `<div class="why-kpi"><span>A股热度 <b>${a.heat == null ? '—' : a.heat.toFixed(0) + '°'}</b></span>
+        <span>涨停 <b class="up">${a.breadth.zt}</b> · 跌停 <b class="down">${a.breadth.dt}</b> · 炸板 ${a.breadth.zb}</span>
+        <span>成交 <b>${yi(a.turnover.amt)}</b>${a.turnover.diff == null ? '' : ` <span class="${cls(a.turnover.diff)}">${a.turnover.diff > 0 ? '+' : '−'}${yi(Math.abs(a.turnover.diff))}</span>`}</span></div>` : '';
+    return label('行情为什么动', 'market-why') + kpi +
+      `<div class="mv-title"><span>今日异动 · 可能原因</span><span>更新 ${fmtCST(d.updated)}</span></div>
+      <div class="why-rows">${top.length ? top.map(({ m, mv, i }) => { const n = news(mv.news[0]?.id);
+        return `<div class="why-row" data-go="#market/${m.id}/${i}"><span class="bx ${cls(mv.chg)}">${mv.chg > 0 ? '+' : '−'}${Math.abs(mv.chg).toFixed(2)}${m.unit === 'bp' ? 'bp' : '%'}</span><span class="mk">${esc(m.name)}</span>
+          <span class="tm">${mv.kind === 'gap' ? '开盘跳空' : hhmm(mv.start) + '–' + hhmm(mv.end)}</span><span class="ell">${esc(n?.title || '同时段没有匹配到相关新闻')}</span></div>`; }).join('') : '<div class="loading">今天暂无明显异动</div>'}</div>
+      <div class="mv-title"><span>影响市场的大事</span><span>${d.events.length} 件 · 近 24 小时</span></div>
+      <div class="why-rows">${d.events.slice(0, 2).map((e, k) => `<div class="why-row" data-go="#news/${e.refs[0]}"><span class="rk ${k === 0 ? 'top' : ''}">${k + 1}</span><span class="ell">${esc(e.title)}</span><span class="tm">${e.refs.length} 家报道</span></div>`).join('')}</div>`;
   } },
 
   { key: 'macro', repo: 'earnings-calendar', load: () => getJSON(ORIGIN + 'earnings-calendar/data.json'), render(d) {
@@ -581,7 +617,7 @@ const CARDS = [
 ];
 
 // 格子顺序（auto-flow 依次填入 7×5）
-const LAYOUT = ['fx', 'hot', 'drama', 'guide', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
+const LAYOUT = ['fx', 'hot', 'drama', 'guide', 'why', 'macro', 'save', 'oil', 'dca', 'weekly', 'weekend', 'game', 'car', 'apps',
   'recall', 'food', 'home', 'resp', 'rules', 'holiday', 'ticket', 'exam', 'match', 'tech', 'ios', 'tools'];
 let MACRO = null, DRAMA = [], dramaIdx = 0;
 const GO = {};                 // 卡片主条目在对应站点里的详情地址（#/item/…），卡片整体点进去直达这条
@@ -592,7 +628,7 @@ function shell() {
   $('#bento').innerHTML = LAYOUT.map(k => {
     if (k === 'tools') return `<div class="card k-tools" id="k-tools"></div>`;
     const c = byKey[k];
-    return `<a class="card k-${k} ${c.cover ? 'cover' : ''} ${(['fx', 'hot', 'weekly', 'apps', 'guide'].includes(k) || c.cover) ? '' : 'mini'}" id="k-${k}" href="${siteUrl(c.repo)}${c.hash || ''}" target="_blank" rel="noopener">
+    return `<a class="card k-${k} ${c.cover ? 'cover' : ''} ${(['fx', 'hot', 'why', 'weekly', 'apps', 'guide'].includes(k) || c.cover) ? '' : 'mini'}" id="k-${k}" href="${siteUrl(c.repo)}${c.hash || ''}" target="_blank" rel="noopener">
       ${label(SITES.find(s => s.repo === c.repo)?.name || c.repo, c.repo)}<div class="loading">加载中…</div></a>`;
   }).join('');
 }

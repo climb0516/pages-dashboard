@@ -33,6 +33,7 @@
 
 - 每格整张可点击进站；标题前的黄 / 红点表示该站健康检查有问题
 - 顶栏健康胶囊：正常 / 注意 / 异常 / 待检查数量；小圆点悬停显示站名和问题，点击跳到该仓库 Actions
+- 行情为什么动卡片（2×2，排在第一屏大卡片之后）：上方是 A 股看盘指标（市场热度、涨停 / 跌停 / 炸板、两市成交额及较上日），中间是今日最显著的 4 段异动和每段排第一的可能原因，下方是影响市场的大事前 2；点异动行直达该段异动归因，点大事直达站内新闻详情，其余位置进 MarketWhy 首页。读 `market-why/data.json` 和 `analysis.json`（后者取不到时只是不显示看盘指标）
 - 攻略地图卡片（2×2，固定在第一屏右上角）：背景是点亮的中国地图，实时读 `travel-guide-map/guides.json` 和 `china-lite.json`，做完新城市推送上线后自动点亮
 - 站点清单在 `sites.js`（分组、名称、类型），健康点和「工具 / 新站点」小格都从这里读
 
@@ -40,7 +41,7 @@
 
 ## 详情模式功能
 
-- **今日要点**（顶部四格）：下一个高影响宏观事件倒计时、USD/CNY、热榜第一、站点健康汇总
+- **今日要点**（顶部五格）：下一个高影响宏观事件倒计时、USD/CNY、热榜第一、A 股市场热度（MarketWhy 看盘）、站点健康汇总
 - **站点卡片**（每张右上角「进入 →」直达对应站点，× 可隐藏，隐藏设置只存在本机浏览器）
 
 | 卡片 | 站点 | 展示 |
@@ -48,6 +49,7 @@
 | 📊 市场 · 汇率 | market-board | 上证 / 恒指 / 纳指100，今日异动 6 只（重点股票里涨跌幅最大的，带 logo），USD/CNY、HKD/CNY、USD/HKD 及日涨跌，联系汇率位置，中间价与市场价差 |
 | 📅 财报宏观 | earnings-calendar | 下一个高影响事件、下次 FOMC 倒计时，7 天内关注公司财报 |
 | 📈 纳指定投 | nasdaq-dca | 基金总数、可申购数，我的定投计划各基金申购状态 |
+| ⚡ 行情为什么动 | market-why | 今日最显著的 4 段异动及可能原因，影响市场的大事前 3 |
 | 🔥 全网热榜 | hot-news | 跨平台大事前 6 |
 | ⚡ 科技动态 | tech-news | 最新 6 条（直连 Supabase） |
 | 🍎 iOS 开发动态 | ios-dev-news | 最新 Xcode / iOS 正式版与进行中的 Beta / RC，7 天动态数，30 天内发版的库 |
@@ -97,6 +99,7 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 | market-board（market.json、fx.json、config.json、logos/） | `quotes[id].{f2,f3,f14}`（id 为东方财富代码，如 `1.000001`）、`config.stocks`（今日异动的候选名单）、`logos/{id}.png`；`ref.rates`、`history`、`cfets` |
 | earnings-calendar | `today_et`、`watchlist`、`macro[].{time,impact,kind,title}`、`earnings[].{date,symbol,name,time,watch}` |
 | nasdaq-dca | `plan[].{code,app}`、`funds[].{code,name,status,status_raw}` |
+| market-why（data.json、analysis.json） | `markets[].{id,name,th,unit,moves[].{start,end,chg,kind,news[].id}}`、`news[].{id,title}`、`events[].{title,refs}`、`updated`；`heat`、`breadth.{zt,dt,zb}`、`turnover.{amt,diff}` |
 | hot-news | `events[].{title,image,platforms[].url}` |
 | tech-news | Supabase `news_items`：`title,source,date,url` |
 | ios-dev-news | `items[].{kind,platform,stage,version,date}`、`libs[].{name,version,date,url}` |
@@ -144,6 +147,7 @@ GitHub Pages（index.html 大屏 / detail.html 详情）
 | macro | earnings-calendar | `data.json` | 有 |
 | save | savings-rates | `data.json` | 有 |
 | dca | nasdaq-dca | `data.json` | 有 |
+| why | market-why | `data.json`、`analysis.json` | 有 |
 | hot | hot-news | `data.json` | 有 |
 | tech | tech-news | Supabase `news_items` | 有 |
 | ios | ios-dev-news | `data.json` | 有 |

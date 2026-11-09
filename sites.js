@@ -7,6 +7,7 @@ window.PAGES_SITES = [
   { repo: 'earnings-calendar', name: '财报宏观', group: '财经', kind: 'data' },
   { repo: 'savings-rates', name: '存款与国债', group: '财经', kind: 'data' },
   { repo: 'nasdaq-dca', name: '纳指定投', group: '财经', kind: 'data' },
+  { repo: 'market-why', name: '行情为什么动', group: '财经', kind: 'data' },
   // 资讯
   { repo: 'hot-news', name: '全网热榜', group: '资讯', kind: 'data' },
   { repo: 'tech-news', name: '科技动态', group: '资讯', kind: 'data' },

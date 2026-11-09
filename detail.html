@@ -97,7 +97,7 @@
     .hero p { color: var(--text-2); margin-top: 4px; }
 
     /* 今日要点 */
-    .strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0 22px; }
+    .strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 18px 0 22px; }
     .kpi { padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .kpi .k { font-size: 12px; color: var(--text-3); font-weight: 600; }
     .kpi .v { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -329,6 +329,23 @@ const SITES = [
           const st = p.f.status === '暂停' ? 'b-err' : /限/.test(p.f.status_raw || p.f.status) ? 'b-warn' : 'b-ok';
           return `<div class="row"><span class="l">${esc(p.f.name)} <span class="muted">${esc(p.app || '')}</span></span><span class="badge ${st}">${esc(p.f.status_raw || p.f.status)}</span></div>`;
         }).join('')}</div>`;
+    },
+  },
+  {
+    repo: 'market-why', title: '⚡ 行情为什么动', color: '#2962ff',
+    load: () => Promise.all([getJSON(ORIGIN + 'market-why/data.json'), getJSON(ORIGIN + 'market-why/analysis.json').catch(() => null)]),
+    render([d, a]) {
+      const news = id => d.news.find(n => n.id === id);
+      const yi = v => v == null ? '—' : Math.abs(v) >= 1e12 ? (v / 1e12).toFixed(2) + '万亿' : (v / 1e8).toFixed(0) + '亿';
+      if (a) KPI.why = { k: 'A股市场热度', v: a.heat == null ? '—' : a.heat.toFixed(0) + '°', s: `涨停 ${a.breadth.zt} / 跌停 ${a.breadth.dt} · 成交 ${yi(a.turnover.amt)}`, url: ORIGIN + 'market-why/#watch' };
+      const moves = [];
+      d.markets.forEach(m => m.moves.forEach((mv, i) => moves.push({ m, mv, i })));
+      moves.sort((x, y) => Math.abs(y.mv.chg) / y.m.th - Math.abs(x.mv.chg) / x.m.th);
+      const mvRows = moves.slice(0, 4).map(({ m, mv, i }) => { const n = news(mv.news[0]?.id);
+        return `<a class="row" href="${ORIGIN}market-why/#market/${m.id}/${i}" target="_blank" rel="noopener"><span class="l">${esc(m.name)} <span class="${mv.chg > 0 ? 'up' : 'down'}">${mv.chg > 0 ? '+' : ''}${mv.chg}${m.unit === 'bp' ? 'bp' : '%'}</span>
+          <span class="muted">${esc(n?.title || '同时段没有匹配到相关新闻')}</span></span></a>`; }).join('');
+      const evRows = d.events.slice(0, 3).map((e, k) => `<a class="row" href="${ORIGIN}market-why/#news/${e.refs[0]}" target="_blank" rel="noopener"><span class="rank">${k + 1}</span><span class="l">${esc(e.title)}</span><span class="r">${e.refs.length} 家报道</span></a>`).join('');
+      return `<div class="rows">${mvRows || '<div class="row"><span class="l muted">今天暂无明显异动</span></div>'}${evRows}</div>`;
     },
   },
   {
@@ -769,6 +786,7 @@ function renderStrip() {
     KPI.macro || { k: '下一个高影响事件', v: '—', s: '' },
     KPI.fx || { k: 'USD/CNY', v: '—', s: '' },
     KPI.hot || { k: '热榜第一', v: '—', s: '' },
+    KPI.why || { k: 'A股市场热度', v: '—', s: '' },
     { k: '站点健康', v: h.length ? (bad ? `${bad} 个异常` : warn ? `${warn} 个需注意` : '全部正常') : '—',
       s: h.length ? `${h.length} 个站点 · 检查于 ${ago(HEALTH.updated)}` : '', color: bad ? 'var(--err)' : warn ? 'var(--warn)' : 'var(--ok)' },
   ];
