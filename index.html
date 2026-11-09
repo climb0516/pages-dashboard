@@ -136,6 +136,8 @@
     .why-kpi { display: flex; gap: 8px 18px; flex-wrap: wrap; margin-top: 12px; font-size: 12.5px; color: var(--text-3); align-items: baseline; }
     .why-kpi b { color: var(--text-1); font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
     .why-kpi b.up { color: var(--up); } .why-kpi b.down { color: var(--down); }
+    .why-al { color: #f5a623; font-weight: 600; font-size: 12.5px; }
+    .why-al.site { color: var(--err); }
     .why-rows { display: flex; flex-direction: column; margin-top: 6px; min-height: 0; }
     .why-row { display: flex; align-items: center; gap: 10px; height: 31px; font-size: 13.5px; min-width: 0; border-bottom: 1px solid var(--hair); }
     .why-row:last-child { border-bottom: 0; }
@@ -353,7 +355,10 @@ const CARDS = [
     const kpi = a ? `<div class="why-kpi"><span>A股热度 <b>${a.heat == null ? '—' : a.heat.toFixed(0) + '°'}</b></span>
         <span>涨停 <b class="up">${a.breadth.zt}</b> · 跌停 <b class="down">${a.breadth.dt}</b> · 炸板 ${a.breadth.zb}</span>
         <span>成交 <b>${yi(a.turnover.amt)}</b>${a.turnover.diff == null ? '' : ` <span class="${cls(a.turnover.diff)}">${a.turnover.diff > 0 ? '+' : '−'}${yi(Math.abs(a.turnover.diff))}</span>`}</span></div>` : '';
-    return label('行情为什么动', 'market-why') + kpi +
+    // 待处理事项（MarketWhy 网站上的警示条）：有网站问题时标红，只有行情异常时标橙
+    const al = d.alerts || [], alSite = al.some(a => a.level === 'site');
+    const alTag = al.length ? `<span class="why-al ${alSite ? 'site' : ''}">⚠ ${al.length} 项待处理</span>` : '';
+    return label('行情为什么动', 'market-why') + (alTag ? `<div class="why-kpi" style="margin-top:6px">${alTag}</div>` : '') + kpi +
       `<div class="mv-title"><span>今日异动 · 可能原因</span><span>更新 ${fmtCST(d.updated)}</span></div>
       <div class="why-rows">${top.length ? top.map(({ m, mv, i }) => { const n = news(mv.news[0]?.id);
         return `<div class="why-row" data-go="#market/${m.id}/${i}"><span class="bx ${cls(mv.chg)}">${mv.chg > 0 ? '+' : '−'}${Math.abs(mv.chg).toFixed(2)}${m.unit === 'bp' ? 'bp' : '%'}</span><span class="mk">${esc(m.name)}</span>

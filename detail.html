@@ -345,7 +345,9 @@ const SITES = [
         return `<a class="row" href="${ORIGIN}market-why/#market/${m.id}/${i}" target="_blank" rel="noopener"><span class="l">${esc(m.name)} <span class="${mv.chg > 0 ? 'up' : 'down'}">${mv.chg > 0 ? '+' : ''}${mv.chg}${m.unit === 'bp' ? 'bp' : '%'}</span>
           <span class="muted">${esc(n?.title || '同时段没有匹配到相关新闻')}</span></span></a>`; }).join('');
       const evRows = d.events.slice(0, 3).map((e, k) => `<a class="row" href="${ORIGIN}market-why/#news/${e.refs[0]}" target="_blank" rel="noopener"><span class="rank">${k + 1}</span><span class="l">${esc(e.title)}</span><span class="r">${e.refs.length} 家报道</span></a>`).join('');
-      return `<div class="rows">${mvRows || '<div class="row"><span class="l muted">今天暂无明显异动</span></div>'}${evRows}</div>`;
+      const al = d.alerts || [];
+      const alRow = al.length ? `<a class="row" href="${ORIGIN}market-why/" target="_blank" rel="noopener"><span class="l" style="color:${al.some(a => a.level === 'site') ? 'var(--err)' : '#f5a623'}">⚠ ${al.length} 项待处理：${esc(al.slice(0, 2).map(a => a.title).join(' · '))}</span></a>` : '';
+      return `<div class="rows">${alRow}${mvRows || '<div class="row"><span class="l muted">今天暂无明显异动</span></div>'}${evRows}</div>`;
     },
   },
   {
